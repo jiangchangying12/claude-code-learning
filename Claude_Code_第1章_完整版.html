@@ -1,0 +1,162 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>第1章 將 Claude Code 整合進軟體工程 · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:240px;flex:0 0 240px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:13px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4;font-size:12.8px}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》第 1 章 · 最完整版</h1><div class=sub>程式設計代理・演進史・三大強項 ｜ 與 AI 協作的新工程</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">第 1 章 · 第 1 部開篇</div>
+<h2 class="ch-title">將 Claude Code 整合進軟體工程</h2>
+<p class="lead">作者：吉田真吾。本章說明何謂程式設計代理（Coding Agent）、它的演進歷史，以及 Claude Code 的特徵與強項，並釐清：代理出現後，軟體工程師的工作會如何改變。核心訊息——我們不再是「對 AI 下指令然後祈禱」，而是把 AI <b>整合進長年累積的軟體開發方法論</b>之中。</p>
+
+<h3>1.1　什麼是程式設計代理</h3>
+<p><b>AI 代理（AI Agent）</b>＝針對指定目標、能自主行動以達成的系統。和傳統軟體最大差別：不必人類逐步指示，AI 會自己推論步驟、採取行動。程式設計代理就是把這套能力用在軟體開發上，是自 LLM 問世以來普及最快的代理應用。</p>
+<div class="callout key"><span class="lbl">🔑 程式設計代理的五個特徵</span>
+① 以自然語言理解需求（從「加上登入功能」這種模糊指示理解意圖）② 自主拆解任務（大目標→可執行小任務）③ 跨多檔生成/修改且保持一致 ④ 自主使用工具（Git、npm、資料庫…）⑤ 處理錯誤（看結果、出錯自我修正）。</div>
+<p><b>為何「現在」才紅？</b>四個因素：</p>
+<ul>
+<li><b>LLM 與代理技術進步</b>：推論強、長文脈、會選用工具。</li>
+<li><b>工程師短缺＆成本高</b>：軟體需求增、優秀人才難找、資深人事費漲。</li>
+<li><b>社會對 AI 的接受度提高</b>、遠距工作普及。</li>
+<li><b>「軟體開發」本身好評估</b>：跑得動/跑不動立刻知道、小循環、效益易感受。</li>
+</ul>
+
+<h3>1.2　程式設計代理的演進歷史</h3>
+<p>2025 年被稱為「AI 代理元年」，其中程式設計代理普及最亮眼。四個里程碑：</p>
+<table>
+<tr><th>年份</th><th>產品</th><th>意義</th></tr>
+<tr><td>2021</td><td>GitHub Copilot</td><td>程式碼補全，歷史第一步</td></tr>
+<tr><td>2023</td><td>Cursor</td><td>IDE 整合、理解整個專案、可多檔一致編輯</td></tr>
+<tr><td>2024</td><td>Devin</td><td>遠端、全自動的「AI 軟體工程師」</td></tr>
+<tr><td>2025</td><td>Claude Code（＋Max 方案）</td><td>CLI 型、背景非同步、Max 訂閱近乎無限用量</td></tr>
+</table>
+<div class="figcap" style="text-align:left">圖 1.1–1.4　主要產品的演進</div>
+<h4>四種類型</h4>
+<div class="fig"><div class="figbox-list">
+① <b>程式碼補全型</b>（Copilot）：編輯器內行內補全，人主導。<br>
+② <b>IDE 整合型</b>（Cursor、Windsurf、TRAE）：對話介面整合進 IDE，理解整個專案、跨多檔編輯。<br>
+③ <b>CLI 型</b>（Claude Code、Gemini CLI、Codex CLI）：終端機運作，便於非同步/平行、與 CI/CD 整合。<br>
+④ <b>遠端型</b>（Devin）：用 Web/Slack 互動，離開電腦也能交付。
+</div><div class="figcap">程式設計代理的四種類型（各陣營正逐漸融合多形態）</div></div>
+
+<h3>1.3　Claude Code 的特徵與強項</h3>
+<div class="callout key"><span class="lbl">💪 三大強項</span>
+① <b>對規格驅動開發的適性</b>：能從上層文件一貫展開到設計、測試、實作。<br>
+② <b>任務拆解能力</b>：把「加上電商金流」拆成 設定金鑰→建資料表→建模型→實作 API→前端表單→錯誤處理→測試→更新文件。<br>
+③ <b>廣泛擴充性</b>：內建工具＋MCP，並有 IDE / GitHub Actions / Slack 整合——學會 Claude Code 等於體驗代理的全貌。</div>
+<p>此外，因使用者規模龐大，活用方法的文章/書籍多，新功能隔天就有解說，學習資源豐富。</p>
+
+<h3>1.4　軟體工程師的工作會如何改變</h3>
+<p>結論：<b>工作內容會變，但不會消失</b>。回顧歷史，抽象化層級不斷提高，每次都有人喊「程式設計師要失業」，實際只是轉向更高層次問題：</p>
+<table>
+<tr><th>時代</th><th>技術</th><th>工程師的角色</th></tr>
+<tr><td>1950s</td><td>機器語言、組合語言</td><td>直接控制硬體</td></tr>
+<tr><td>1970s</td><td>C 等高階語言</td><td>系統程式設計</td></tr>
+<tr><td>1990s</td><td>Java 等物件導向</td><td>抽象化程式設計</td></tr>
+<tr><td>2020s</td><td>程式設計代理</td><td>需求定義、設計、驗證中與 AI 協作</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 1.1　抽象化層級的演進與工程師的角色</div>
+<div class="callout tip"><span class="lbl">🤖 AI 難取代、人較擅長的事</span>
+發掘商業問題、評估商業價值（該做/不該做什麼）、架構取捨判斷、品質把關、團隊協作與文化養成。<b>AI 是提案者，人是決定者。</b></div>
+<p><b>「會的人變得更會」</b>：擅長把設計力、審查力化為對 AI 的具體指示與回饋的人，生產力被乘法放大——也讓擅長與不擅長者差距擴大。今後關鍵技能：對技術變化的快速學習力、AI 協作技能（控制輸出、正確評估與回饋）、系統思考與設計思考。</p>
+
+<h3>1.5　本章小結</h3>
+<div class="callout key"><span class="lbl">✅ 三個核心</span>
+① 程式設計代理是「能最大限度引出 LLM 能力、用於軟體開發」的 AI 代理；開發者將與它協作。<br>
+② 以規格驅動開發確實實現想做之物（PRD→設計→測試→實作→驗證，第 4 章實作）。<br>
+③ 工程師角色朝「更高層次問題解決」移動。</div>
+<p>準備好了嗎？第 2 章起就實際安裝 Claude Code 動手實踐。</p>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "程式設計代理與一般聊天 AI 最大的差別？", "options": ["只能回答問題", "會自己感知、決定並採取行動（讀寫檔、執行指令、修錯）", "只能用英文", "完全相同"], "answer": 1, "explain": "代理自主拆解任務、使用工具、處理錯誤；聊天 AI 只給答案不代你執行。"}, {"type": "mc", "q": "Claude Code 屬於哪一種類型的代理？", "options": ["程式碼補全型", "IDE 整合型", "CLI 型", "純硬體型"], "answer": 2, "explain": "Claude Code 是 CLI 型，便於背景非同步/平行與自動化串接。"}, {"type": "mc", "q": "Claude Code 的『三大強項』不包含？", "options": ["對規格驅動開發的適性", "任務拆解能力", "廣泛擴充性", "保證程式碼零 bug"], "answer": 3, "explain": "AI 不保證零 bug，仍需人類驗證。"}, {"type": "mc", "q": "演進時間軸中，2024 年代表『遠端、全自動』的產品是？", "options": ["GitHub Copilot", "Cursor", "Devin", "Claude Code"], "answer": 2, "explain": "2024 年 Devin 主打遠端、全自動的工程師代理。"}, {"type": "tf", "q": "程式設計代理遇到錯誤時會停下來等使用者處理。", "options": ["正確", "錯誤"], "answer": 1, "explain": "錯誤。代理的特徵之一就是『處理錯誤』——自己看訊息、嘗試修正。"}, {"type": "mc", "q": "程式設計代理『現在』才普及的四個原因不含？", "options": ["LLM 技術進步", "工程師短缺、成本高", "社會接受度提高", "程式語言全面被淘汰"], "answer": 3, "explain": "四原因是技術進步、工程師短缺、接受度提高、軟體開發好評估。"}, {"type": "tf", "q": "作者認為 AI 普及後，『決定要做什麼』會比『怎麼把它寫出來』更重要。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。工程師角色往更高層次問題移動；商業判斷、架構決策是 AI 難取代的部分。"}, {"type": "mc", "q": "下列何者是『AI 較難取代、人類較擅長』的工作？", "options": ["跨多檔生成一致程式碼", "執行測試並修正", "架構取捨與商業價值評估", "重構既有程式碼"], "answer": 2, "explain": "發掘商業問題、評估價值、架構取捨、品質把關、團隊協作屬人類強項。"}, {"type": "mc", "q": "抽象化層級的歷史演進，下列順序何者正確？", "options": ["物件導向→組合語言→AI 代理", "機器語言→高階語言→物件導向→程式設計代理", "AI 代理→Java→C", "Java→機器語言→C"], "answer": 1, "explain": "層級一路提高：機器語言→高階語言→物件導向→程式設計代理。"}, {"type": "mc", "q": "『會的人變得更會』指的是？", "options": ["AI 讓所有人能力相同", "擅長把設計/審查化為對 AI 具體指示與回饋的人，生產力被放大", "只有資深工程師能用 AI", "AI 會自動提升所有人薪水"], "answer": 1, "explain": "既有設計/審查力＋擅長下指示者，效果被乘法槓桿放大。"}];
+const SECS=[{"id": "s11", "label": "1.1 什麼是程式設計代理", "pfx": "1.1"}, {"id": "s12", "label": "1.2 演進歷史", "pfx": "1.2"}, {"id": "s13", "label": "1.3 三大強項", "pfx": "1.3"}, {"id": "s14", "label": "1.4 工作如何改變", "pfx": "1.4"}, {"id": "s15", "label": "1.5 本章小結", "pfx": "1.5"}];     // [{id,label,pfx}]
+const TITLE="第1章 將 Claude Code 整合進軟體工程";
+const LS="cc_"+"ch1"+"_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECS.forEach(s=>{if(st.sec[s.id])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ SECS.forEach(s=>{h+='<a onclick="jump(\''+s.id+'\')">'+s.label+'</a>';});
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.querySelector('#toc .tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function injectSecBtns(){
+ document.querySelectorAll('#main h3').forEach(h=>{const t=h.textContent;
+  SECS.forEach(s=>{ if(t.indexOf(s.pfx)===0){ h.id=s.id; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=s.id; b.setAttribute('onclick',"toggleSec('"+s.id+"')"); h.appendChild(b);} });
+ });
+}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div><button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;bindQuiz();
+}
+let answered={};
+function bindQuiz(){document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+ qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+  qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+  const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+  if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+  ex.classList.add('show');if(Object.keys(answered).length===QUIZ.length)finish();
+ }})});}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>

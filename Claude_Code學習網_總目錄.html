@@ -1,0 +1,87 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8>
+<meta name=viewport content='width=device-width,initial-scale=1'>
+<title>《實踐 Claude Code 入門》互動學習網 · 總目錄</title>
+<style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--chip:#243040;}
+*{box-sizing:border-box}body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.8}
+header{text-align:center;padding:44px 20px 26px;background:linear-gradient(180deg,#11161d,#0f1216);border-bottom:1px solid var(--line)}
+header .jp{font-size:13px;color:var(--muted);letter-spacing:3px}
+header h1{font-size:30px;margin:8px 0 6px;color:var(--accent)}
+header .sub{font-size:14px;color:var(--accent2)}
+.wrap{max-width:1080px;margin:0 auto;padding:24px 18px 60px}
+.dash{display:flex;gap:22px;align-items:center;background:var(--panel);border:1px solid var(--line);border-radius:16px;padding:22px;margin-bottom:14px;flex-wrap:wrap;justify-content:center}
+.dash .stat{text-align:center;min-width:120px}
+.dash .num{font-size:26px;font-weight:800;color:var(--accent2)}
+.dash .cap{font-size:12px;color:var(--muted)}
+.refresh{font-size:12.5px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:8px;padding:7px 14px;cursor:pointer}
+.refresh:hover{border-color:var(--accent2);color:var(--accent2)}
+.note{font-size:12px;color:var(--muted);background:var(--panel2);border:1px solid var(--line);border-radius:10px;padding:10px 14px;margin-bottom:22px}
+.parttitle{font-size:14px;color:var(--accent);margin:26px 0 12px;border-left:4px solid var(--accent);padding-left:10px}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.card{display:block;background:var(--panel);border:1px solid var(--line);border-radius:14px;padding:18px;text-decoration:none;color:var(--txt);transition:.15s;position:relative}
+.card:hover{border-color:var(--accent2);transform:translateY(-2px);box-shadow:0 6px 18px rgba(0,0,0,.3)}
+.card .cn{font-size:13px;color:var(--accent2);font-weight:700}
+.card .ct{font-size:18px;font-weight:700;margin:3px 0 6px}
+.card .cd{font-size:13px;color:var(--muted);min-height:38px}
+.card .pbar{height:7px;background:var(--panel2);border-radius:6px;overflow:hidden;margin-top:12px}
+.card .pf{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2))}
+.card .meta{display:flex;justify-content:space-between;font-size:11.5px;color:var(--muted);margin-top:7px}
+.card .done{position:absolute;top:14px;right:14px;font-size:12px;color:var(--ok);font-weight:700;display:none}
+.card.passed .done{display:block}
+.card.passed{border-color:rgba(76,175,120,.5)}
+.extra{margin-top:30px;display:flex;gap:12px;flex-wrap:wrap;justify-content:center}
+.extra a{font-size:13px;color:var(--accent2);text-decoration:none;border:1px solid var(--line);border-radius:20px;padding:8px 16px}
+.extra a:hover{border-color:var(--accent2)}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:20px}
+</style></head><body>
+<header><div class=jp>実践 Claude Code 入門</div>
+<h1>《實踐 Claude Code 入門》互動學習網</h1>
+<div class=sub>繁體中文・台灣資訊用語 ｜ 9 章＋附錄 ｜ 讀重點 → 翻閃卡 → 做測驗</div></header>
+<div class=wrap>
+ <div class=dash>
+  <svg id=ring width=120 height=120 viewBox="0 0 120 120"></svg>
+  <div class=stat><div class=num id=passN>0</div><div class=cap>測驗通過章數 / 10</div></div>
+  <div class=stat><div class=num id=startN>0</div><div class=cap>已開始章數 / 10</div></div>
+  <button class=refresh onclick=load()>⟳ 重新整理進度</button>
+ </div>
+ <div class=note>💡 學習法：別只「讀過」——每章請<b>讀重點 → 翻完閃卡式問答 → 做測驗</b>。進度存在各章頁面的瀏覽器中；用同一瀏覽器（建議 Chrome）以檔案方式開啟即可同步顯示。每章達「測驗 60%」即標記通過。</div>
+ <div id=parts></div>
+ <div class=extra>
+  <a href="實踐Claude_Code入門_繁體中文版.pdf" target=_blank>📕 全書繁中 PDF（153 頁）</a>
+  <a href="Claude_Code學習網_完整版.html" target=_blank>📘 單檔整本學習網（含閃卡＋搜尋）</a>
+ </div>
+</div>
+<footer>進度儲存於瀏覽器 localStorage · 清除快取或換裝置會重置</footer>
+<script>
+const CH=[{"key": "cc_ch1_v1", "file": "Claude_Code_第1章_完整版.html", "n": "第 1 章", "t": "將 Claude Code 整合進軟體工程", "d": "程式設計代理是什麼、演進史、三大強項、工作如何改變", "part": "第 1 部 基礎", "secs": 5}, {"key": "cc_ch2_v1", "file": "Claude_Code_第2章_完整版.html", "n": "第 2 章", "t": "Claude Code 的基礎", "d": "驗證方式、Dev Container、安裝、斜線指令、CLAUDE.md", "part": "第 1 部 基礎", "secs": 6}, {"key": "cc_ch3_v1", "file": "Claude_Code_第3章_完整版.html", "n": "第 3 章", "t": "精通 MCP！", "d": "USB-C 概念、架構、Playwright、實用 MCP 伺服器", "part": "第 1 部 基礎", "secs": 4}, {"key": "cc_ch4_v1", "file": "Claude_Code_第4章_完整版.html", "n": "第 4 章 ★", "t": "向達人學習規格驅動開發", "d": "Vibe Coding 的坑、What/How 共識、永續性文件＋引導檔", "part": "第 1 部 基礎", "secs": 5}, {"key": "cc_ch5_v1", "file": "Claude_Code_第5章_完整版.html", "n": "第 5 章", "t": "活用 Claude Code Action", "d": "GitHub Actions、環境代理、Issue 分類自動化", "part": "第 1 部 基礎", "secs": 5}, {"key": "cc_ch6_v1", "file": "Claude_Code_第6章_完整版.html", "n": "第 6 章", "t": "理解 Claude Code 的運作原理", "d": "AI 代理五要素、三大課題、Context Rot", "part": "第 2 部 原理與機制化", "secs": 3}, {"key": "cc_ch7_v1", "file": "Claude_Code_第7章_完整版.html", "n": "第 7 章 ★", "t": "讓 Claude Code 照意圖運作", "d": "情境工程、斜線指令/技能/鉤子、Sandboxing", "part": "第 2 部 原理與機制化", "secs": 4}, {"key": "cc_ch8_v1", "file": "Claude_Code_第8章_完整版.html", "n": "第 8 章", "t": "機制化（設計篇）", "d": "三斜線指令、技能、子代理、實作迴圈", "part": "第 2 部 原理與機制化", "secs": 5}, {"key": "cc_ch9_v1", "file": "Claude_Code_第9章_完整版.html", "n": "第 9 章", "t": "機制化（實踐篇）", "d": "無頭模式、自動開發、日誌分析", "part": "第 2 部 原理與機制化", "secs": 4}, {"key": "cc_appx_v1", "file": "Claude_Code_附錄_完整版.html", "n": "附錄", "t": "服務設定・Anthropic 概要與法務", "d": "Bedrock、GitHub CLI、合規與規約", "part": "附錄", "secs": 3}];
+function read(k){try{return JSON.parse(localStorage.getItem(k))||{}}catch(e){return{}}}
+function chProg(c){const s=read(c.key);const secObj=s.sec||{};
+ let secDone=0;Object.keys(secObj).forEach(k=>{if(secObj[k]&&k!=='squiz')secDone++;});
+ const best=(s.score&&s.score.total)?s.score.got/s.score.total:null;
+ const passed=best!==null&&best>=0.6;
+ const denom=c.secs+1; let done=Math.min(secDone,c.secs)+(passed?1:0);
+ return {pct:Math.round(done/denom*100),secDone:Math.min(secDone,c.secs),best,passed};}
+function render(){
+ const parts={};CH.forEach(c=>{(parts[c.part]=parts[c.part]||[]).push(c)});
+ let h='';let pass=0,start=0;
+ for(const p in parts){h+='<div class=parttitle>'+p+'</div><div class=grid>';
+  parts[p].forEach(c=>{const pr=chProg(c);if(pr.passed)pass++;if(pr.pct>0)start++;
+   const bestTxt=pr.best===null?'未測驗':'測驗 '+Math.round(pr.best*100)+'%';
+   h+='<a class="card'+(pr.passed?' passed':'')+'" href="'+encodeURI(c.file)+'">'
+    +'<span class=done>✓ 已通過</span>'
+    +'<div class=cn>'+c.n+'</div><div class=ct>'+c.t+'</div><div class=cd>'+c.d+'</div>'
+    +'<div class=pbar><div class=pf style="width:'+pr.pct+'%"></div></div>'
+    +'<div class=meta><span>已讀 '+pr.secDone+'/'+c.secs+' 節</span><span>'+bestTxt+'</span></div></a>';
+  });h+='</div>';}
+ document.getElementById('parts').innerHTML=h;
+ document.getElementById('passN').textContent=pass;
+ document.getElementById('startN').textContent=start;
+ ring(Math.round(pass/CH.length*100));
+}
+function ring(pct){const R=50,C=2*Math.PI*R,off=C*(1-pct/100);
+ document.getElementById('ring').innerHTML='<circle cx=60 cy=60 r=50 fill=none stroke="#1e242d" stroke-width=12/>'
+ +'<circle cx=60 cy=60 r=50 fill=none stroke="#4caf78" stroke-width=12 stroke-linecap=round stroke-dasharray="'+C+'" stroke-dashoffset="'+off+'" transform="rotate(-90 60 60)"/>'
+ +'<text x=60 y=68 text-anchor=middle font-size=24 font-weight=800 fill="#e6eaf0">'+pct+'%</text>';}
+function load(){render()}
+load();
+</script></body></html>

@@ -1,0 +1,154 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>第3章 精通 MCP！ · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:240px;flex:0 0 240px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:13px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4;font-size:12.8px}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》第 3 章 · 最完整版</h1><div class=sub>USB-C 概念・架構・Playwright・實用伺服器 ｜ 連接外部世界</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">第 3 章 · 連接外部世界</div>
+<h2 class="ch-title">精通 MCP！讓 AI 連上外部系統</h2>
+<p class="lead">作者：大嶋勇樹。MCP 是擴充 Claude Code 等代理的關鍵。本章從基礎講起，動手在 Claude Code 設定並運作 MCP，最後介紹對開發很方便的 MCP 伺服器。</p>
+
+<h3>3.1　MCP 入門</h3>
+<p><b>MCP（Model Context Protocol）</b>是 Anthropic 提出、標準化「AI 應用程式 ↔ 外部系統」連線的協定，被喻為「<b>AI 應用程式的 USB-C 連接埠</b>」。</p>
+<div class="fig">
+<svg viewBox="0 0 640 150" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <rect x="20" y="50" width="150" height="48" rx="10" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="95" y="79" fill="var(--accent)" text-anchor="middle" font-weight="bold">AI 應用程式</text>
+ <text x="195" y="79" fill="var(--muted)" font-size="13" text-anchor="middle">— MCP →</text>
+ <g><rect x="270" y="20" width="150" height="32" rx="6" fill="var(--chip)"/><text x="345" y="41" fill="var(--txt)" text-anchor="middle">外部系統 X</text>
+ <rect x="270" y="59" width="150" height="32" rx="6" fill="var(--chip)"/><text x="345" y="80" fill="var(--txt)" text-anchor="middle">外部系統 Y</text>
+ <rect x="270" y="98" width="150" height="32" rx="6" fill="var(--chip)"/><text x="345" y="119" fill="var(--txt)" text-anchor="middle">外部系統 Z</text></g>
+</svg>
+<div class="figcap">圖 3.1　MCP 的概念：用一套標準協定連接各外部系統</div></div>
+<div class="callout key"><span class="lbl">🔌 出現前 vs 出現後</span>
+出現前：每家連線方式各異，只有支援相同方式的組合才能連（N×M 的痛苦）。出現後：只要支援 MCP 就能互連，開發方各自支援 MCP 即可任意組合（圖 3.3/3.4）。</div>
+<p><b>架構鏈</b>（圖 3.5）：AI 應用程式（MCP 主機）→ 內含 MCP 用戶端 → 連本機/遠端 MCP 伺服器 → 連外部系統（瀏覽器、GitHub…）。</p>
+<table>
+<tr><th>功能</th><th>說明</th></tr>
+<tr><td><b>Tools</b>（目前主用）</td><td>MCP 伺服器提供「可由模型呼叫的工具」</td></tr>
+<tr><td>Resources</td><td>提供給模型參照的資源</td></tr>
+<tr><td>Prompts</td><td>提供給模型的提示樣板</td></tr>
+<tr><td>Roots / Sampling / Elicitation</td><td>存取用戶端檔案系統／呼叫用戶端模型／向使用者要補充資訊</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 3.1　MCP 的主要功能（本書後續皆以 Tools 為對象）</div>
+
+<h3>3.2　在 Claude Code 試用（Playwright MCP）</h3>
+<p>兩種設定：編輯 <code>.mcp.json</code>，或用 <code>claude mcp</code> 指令。範例（Playwright MCP，操作瀏覽器）：</p>
+<pre><code>{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest","--browser","chromium","--isolated","--no-sandbox"]
+    }
+  }
+}</code></pre>
+<p>重啟 Claude Code 會偵測到新 MCP 並請你核准啟用（選「Use this and all future MCP servers」）。之後請它「開網頁、截圖」，它會逐一請求許可（起伺服器 → 開頁 → 裝瀏覽器 → 截圖），<b>發生錯誤時試圖自動解決</b>是代理的一大特徵。</p>
+<div class="callout tip"><span class="lbl">⚠️ 安全提醒</span>瀏覽器操作可能把含機密的請求送往非預期網站，因此「未核准就自動操作」需特別小心。</div>
+
+<h3>3.3　介紹對開發很方便的 MCP 伺服器</h3>
+<table>
+<tr><th>MCP</th><th>用途</th></tr>
+<tr><td>Context7</td><td>取得函式庫最新/特定版本文件與範例，彌補模型訓練資料的時效落差</td></tr>
+<tr><td>Serena</td><td>像 IDE 的符號級搜尋/重新命名/追蹤；能把支援 MCP 的 AI 應用變成程式設計代理</td></tr>
+<tr><td>Chrome DevTools</td><td>除了操作瀏覽器，還能做效能分析、看網路請求與 console 訊息</td></tr>
+</table>
+<p>MCP 伺服器越來越多，已有彙整的 MCP Registry（如 GitHub 的 https://github.com/mcp）。</p>
+<div class="callout key"><span class="lbl">💡 用 MCP？還是做成指令？</span>
+要給代理額外工具，未必非用 MCP。代理本就能執行指令，所以也可把工具做成 CLI。<b>現成工具用 MCP；專案內的小工具，常更適合做成指令。</b></div>
+
+<h3>3.4　本章小結</h3>
+<div class="callout key"><span class="lbl">✅ 一句話總結</span>MCP 標準化「向 LLM 提供脈絡、連接外部系統」的方式；目前主用 <b>Tools</b>。設定簡單（.mcp.json 或 claude mcp），生態系（含 Registry）持續成長。</div>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "MCP 常被比喻為什麼？", "options": ["AI 的大腦", "AI 應用程式的 USB-C 連接埠", "新的程式語言", "一種 LLM 模型"], "answer": 1, "explain": "MCP 標準化連線，像通用接口 USB-C。"}, {"type": "mc", "q": "MCP 架構中，Claude Code 扮演？", "options": ["MCP 伺服器", "MCP 主機（內含用戶端）", "外部系統", "資料庫"], "answer": 1, "explain": "AI 應用程式是 MCP 主機，內部用戶端連到 MCP 伺服器。"}, {"type": "mc", "q": "截至本書，MCP 最常被使用的功能是？", "options": ["Prompts", "Resources", "Tools", "Sampling"], "answer": 2, "explain": "Tools 提供模型可呼叫的工具，是目前主用功能。"}, {"type": "tf", "q": "MCP 出現後，只要 AI 應用程式與外部系統各自支援 MCP，就能互相連接。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。標準化後降低 N×M 連線複雜度。"}, {"type": "mc", "q": "在 Claude Code 設定 MCP 的兩種方式？", "options": ["只能用圖形介面", "編輯 .mcp.json 或用 claude mcp 指令", "重裝 Claude Code", "購買授權"], "answer": 1, "explain": "兩種皆可；本書示範直接編輯 .mcp.json。"}, {"type": "mc", "q": "Context7 MCP 解決什麼問題？", "options": ["加速網路", "取得函式庫最新文件，彌補模型時效落差", "壓縮日誌", "管理金鑰"], "answer": 1, "explain": "讓代理邊確認函式庫最新/特定版本資訊邊實作。"}, {"type": "mc", "q": "關於『MCP vs 指令』的建議，何者正確？", "options": ["一律用 MCP", "一律用指令", "現成工具用 MCP，專案內小工具常更適合做成指令", "兩者不能並存"], "answer": 2, "explain": "視情況選擇；代理本就能執行指令。"}, {"type": "tf", "q": "代理在 MCP 操作出錯時，會嘗試自動解決（如自動安裝缺少的瀏覽器）。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。發生錯誤時試圖自動解決是程式設計代理的一大特徵。"}, {"type": "mc", "q": "下列哪個 MCP 適合『效能分析、看網路請求與 console』？", "options": ["Context7", "Serena", "Chrome DevTools MCP", "Playwright（僅截圖）"], "answer": 2, "explain": "Chrome DevTools MCP 提供效能、網路、console 分析。"}, {"type": "mc", "q": "使用瀏覽器操作類 MCP 時的主要風險是？", "options": ["太慢", "可能把含機密的請求送往非預期網站", "佔太多硬碟", "無法截圖"], "answer": 1, "explain": "故『未核准就自動操作』需特別小心。"}];
+const SECS=[{"id": "s31", "label": "3.1 MCP 入門", "pfx": "3.1"}, {"id": "s32", "label": "3.2 試用 Playwright MCP", "pfx": "3.2"}, {"id": "s33", "label": "3.3 實用 MCP 伺服器", "pfx": "3.3"}, {"id": "s34", "label": "3.4 本章小結", "pfx": "3.4"}];     // [{id,label,pfx}]
+const TITLE="第3章 精通 MCP！";
+const LS="cc_"+"ch3"+"_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECS.forEach(s=>{if(st.sec[s.id])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ SECS.forEach(s=>{h+='<a onclick="jump(\''+s.id+'\')">'+s.label+'</a>';});
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.querySelector('#toc .tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function injectSecBtns(){
+ document.querySelectorAll('#main h3').forEach(h=>{const t=h.textContent;
+  SECS.forEach(s=>{ if(t.indexOf(s.pfx)===0){ h.id=s.id; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=s.id; b.setAttribute('onclick',"toggleSec('"+s.id+"')"); h.appendChild(b);} });
+ });
+}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div><button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;bindQuiz();
+}
+let answered={};
+function bindQuiz(){document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+ qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+  qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+  const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+  if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+  ex.classList.add('show');if(Object.keys(answered).length===QUIZ.length)finish();
+ }})});}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>

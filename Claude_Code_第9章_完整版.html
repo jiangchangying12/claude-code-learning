@@ -1,0 +1,169 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>第9章 把規格驅動開發機制化（實踐篇） · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:240px;flex:0 0 240px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:13px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4;font-size:12.8px}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》第 9 章 · 最完整版</h1><div class=sub>無頭模式・自動開發・日誌分析 ｜ 讓機制真正自動跑起來</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">第 9 章 · 機制化【實踐篇】</div>
+<h2 class="ch-title">把規格驅動開發的流程機制化（實踐篇）</h2>
+<p class="lead">作者：西見公宏。第 8 章建好機制，本章用<b>無頭模式（headless）</b>把它自動跑起來，體驗「互動執行＋自動執行」結合的開發流程，並學會用 LLM 分析執行日誌、持續改善機制。</p>
+<div class="callout key"><span class="lbl">🎯 本章重點</span>無頭模式＝不對話、以程式方式執行 Claude Code，搭配斜線指令/技能/子代理即可自動化整個開發流程。</div>
+
+<h3>9.1　以無頭模式完全自動化</h3>
+<p>之前都是互動執行（REPL）；雖能自動化複雜流程，但某些步驟仍要使用者核准。無頭模式則「事先以指令指定動作、從頭到尾自動」。</p>
+<h4>基本用法與差異</h4>
+<p>互動模式可按 <code>shift+tab</code> 切換三種權限模式（一般→自動編輯→計畫）；無頭模式則用 <code>-p</code>/<code>--print</code>，一次指示、無對話完成：</p>
+<pre><code>claude -p "請說明 src/ 的程式碼"           # 命令列引數
+echo "請說明 src/ 的程式碼" | claude -p     # 標準輸入
+cat prompt.md | claude -p                  # 從檔案</code></pre>
+<table>
+<tr><th>選項</th><th>說明</th></tr>
+<tr><td>--print, -p</td><td>無頭模式執行</td></tr>
+<tr><td>--output-format</td><td>text / json / stream-json</td></tr>
+<tr><td>--model</td><td>指定模型</td></tr>
+<tr><td>--dangerously-skip-permissions</td><td>跳過所有權限確認</td></tr>
+<tr><td>--allowedTools / --disallowedTools</td><td>限制可/不可用的工具</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 9.1　無頭模式常用選項</div>
+<div class="callout tip"><span class="lbl">⚠️ 安全</span><code>--dangerously-skip-permissions</code> 在未隔離環境很危險；若不在 Docker 隔離，建議用 <code>--allowedTools</code>/<code>--disallowedTools</code> 限制——因為難以預測它會執行什麼指令，最壞可能破壞環境。</div>
+
+<h4>輸出格式</h4>
+<table>
+<tr><th>格式</th><th>用途</th></tr>
+<tr><td>text（預設）</td><td>純文字結果</td></tr>
+<tr><td>json</td><td>含 duration、cost、token usage 等統計</td></tr>
+<tr><td>stream-json（需 --verbose）</td><td>逐則 JSON 即時串流，便於追蹤進度與事後分析軌跡</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表（圖 9.3–9.7）　輸出格式</div>
+
+<h4>自動開發 MVP 的指令</h4>
+<p><code>prompt.md</code> 只放一行 <code>/add-feature 請開發產品需求定義書中的核心機能（MVP）。</code>（因 /add-feature 已含全工程，呼叫即完結）。指令範例：</p>
+<pre><code>cat prompt.md | claude -p --dangerously-skip-permissions \
+  --output-format stream-json --verbose \
+  --model claude-sonnet-4-20250514 2>&1 | tee output.jsonl</code></pre>
+<p>各部分：<code>cat … |</code> 把提示從標準輸入餵入；<code>-p</code> 無頭；<code>stream-json --verbose</code> 即時記錄；<code>--model</code> 指定模型；<code>2&gt;&amp;1 | tee output.jsonl</code> 把含錯誤的全部輸出邊顯示邊存成 JSON Lines。</p>
+<div class="callout key"><span class="lbl">🤔 為何選 Sonnet 4 而非 4.5？</span>
+無頭模式不指定時預設 Sonnet 4.5，但 4.5 在互動下品質高、卻常停下發問（「這實作可以嗎？」），無頭下人無法回應就會中斷。實測 <b>Sonnet 4 較少中途徵詢、較能一路跑到底</b>，故本章刻意選它。建議：常用無頭就建「基準測試」機制，每次模型更新都比較動作差異。</div>
+
+<h3>9.2　【實踐】任務管理 App 的自動開發</h3>
+<p>和第 4 章同一個 App，這次全自動。流程：</p>
+<div class="fig"><div class="figbox-list">
+① 準備構想筆記（docs/ideas/initial-requirements.md，寫好概念/主要機能/非機能需求）<br>
+② <b>REPL 互動</b>跑 <code>/setup-project</code> 生成 6 份文件、逐份核准 → 跑 <code>/review-docs</code> 審查並反映指摘<br>
+③ <b>無頭模式</b>跑 <code>/add-feature</code>（上面的指令）→ 自動產出可用的 <code>task</code> CLI（含 add/list/show/start/done/delete，Git 整合）<br>
+④ 計畫紀錄留在 <code>.steering/YYYYMMDD-[機能名]/tasklist.md</code>
+</div><div class="figcap">圖 9.9–9.19　從文件到自動實作出 task CLI</div></div>
+<div class="callout tip"><span class="lbl">⚠️ 務必 Dev Container</span>因 <code>--dangerously-skip-permissions</code> 放行所有工具，務必在 Dev Container 執行。即便如此，仍可能透過 WebFetch 把容器內可存取的認證資訊帶到外部，動手實作時要留意。</div>
+
+<h4>分析無頭執行的日誌</h4>
+<p>用 steering 技能要求「作業中務必更新 tasklist.md」，但模型/Claude Code 更新後可能失靈。此時保存的 <code>output.jsonl</code> 就派上用場——但日誌常達數百 KB、難目視。</p>
+<div class="callout ex"><span class="lbl">🔎 用 LLM 分析日誌</span>
+筆者群用 <b>Google Gemini 2.5 Pro / Google AI Studio</b> 分析較具參考性。把 <code>.jsonl</code> 改副檔名為 <code>.json</code> 上傳，提示：「這是 Claude Code 執行日誌，請依時序整理代理行動、並提具體改善建議」。它會把行動拆成「準備計畫→實作→品質檢查與自我修復→E2E 測試與完成」四階段，並建議導入 TDD、縮短回饋循環（近似 CI）、強化專案特有規則學習等。<b>注意：</b>未啟用付費帳單時，Google AI Studio 屬「免費服務」、送出資料可能被用於訓練；機密資料請用付費服務。</div>
+<div class="callout key"><span class="lbl">💡 核心方法</span>無頭模式難即時看「斜線指令是否執行、技能是否載入、是否照 tasklist 走」，用 LLM 分析日誌找原因，再<b>修正技能/提示、轉動實驗循環</b>。</div>
+
+<h3>9.3　如何更進一步發展</h3>
+<p>三者分工再強調：<b>技能定義「做法」</b>、<b>斜線指令定義「流程」</b>、<b>子代理做「獨立驗證/分析」</b>。擴充方向：</p>
+<ul>
+<li><b>技能</b>依三單位擴充：成果物（API 規格書、測試計畫書…）／任務（效能測試、DB 遷移、資安掃描…）／領域（法規要件、品牌指南、商業規則）。</li>
+<li><b>斜線指令</b>：把新定型作業指令化（修 bug、重構、效能改善流程）；既有指令派生專門版（如 <code>/add-feature-with-migration</code> 加入遷移檔審查步驟）；調整核准點（重品質就每份都核准、重速度就事後審查）。</li>
+<li><b>子代理</b>：特化於大量讀檔（影響範圍分析、資安調查）與專門驗證（資安審查、無障礙檢查）；回傳結構化報告，必要時把報告存檔供日後參照。</li>
+</ul>
+
+<h3>9.4　本章小結</h3>
+<div class="callout key"><span class="lbl">🧭 最終心法</span>
+工具與代理本身更新太快、無法全部跟上。<b>把 Claude Code 理解為 AI 代理、學會切分問題、依意圖活用功能</b>，才是能遷移到任何代理的核心能力。第 8、9 章只是把第 4 章流程「單純機制化」，請以此為起點，打造符合自身團隊/專案的獨有機制。</div>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "無頭模式（headless）的啟動選項是？", "options": ["--chat", "-p / --print", "--gui", "--repl"], "answer": 1, "explain": "-p/--print 進入無頭模式，一次指示、無對話完成。"}, {"type": "mc", "q": "哪種輸出格式最適合『事後分析代理行動軌跡』？", "options": ["text", "json", "stream-json（含 --verbose）", "csv"], "answer": 2, "explain": "stream-json 逐則輸出 JSON，利於追蹤與事後分析。"}, {"type": "tf", "q": "執行自動 MVP 開發（含 --dangerously-skip-permissions）時，務必在 Dev Container 等隔離環境。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。該選項放行所有工具，未隔離有破壞環境或外洩風險。"}, {"type": "mc", "q": "本章為何在無頭模式選 Sonnet 4（而非 4.5）？", "options": ["比較便宜", "較少中途徵詢、較能一路跑到底", "唯一支援無頭", "效能最高"], "answer": 1, "explain": "Sonnet 4.5 互動品質高但常停下發問，無頭下會中斷；Sonnet 4 較能跑完。"}, {"type": "mc", "q": "prompt.md 為何只放一行 /add-feature？", "options": ["偷懶", "因 /add-feature 已含引導檔→實作→測試→驗證全工程", "檔案不能太長", "為了省 token"], "answer": 1, "explain": "工作流程已封裝在斜線指令裡，呼叫一句即完結，提示得以精簡。"}, {"type": "mc", "q": "無頭執行的日誌很長、難目視，書中建議？", "options": ["放棄分析", "用 LLM（如 Gemini 2.5 Pro）分析軌跡、找問題並改善提示", "只看最後一行", "重跑一次"], "answer": 1, "explain": "用 LLM 分析 output.jsonl，整理行動時序與改善建議，再修正技能/提示。"}, {"type": "tf", "q": "用免費（未啟用付費帳單）的 Google AI Studio 分析日誌，送出的資料可能被用於模型訓練。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。免費服務條款下資料可能被用於訓練；機密資料應改用付費服務。"}, {"type": "mc", "q": "2>&1 | tee output.jsonl 的作用是？", "options": ["只顯示不存檔", "把含錯誤的全部輸出邊顯示邊存成檔案", "只存錯誤", "加密輸出"], "answer": 1, "explain": "2>&1 把 stderr 併入 stdout，tee 同時顯示與寫檔。"}, {"type": "mc", "q": "技能擴充的三個單位是？", "options": ["前端/後端/全端", "成果物/任務/領域", "小/中/大", "讀/寫/執行"], "answer": 1, "explain": "成果物單位、任務單位、領域單位。"}, {"type": "mc", "q": "本書第二部最終想傳達的心法是？", "options": ["背熟所有現成工具", "把代理理解透徹、學會切分問題，能遷移到任何代理", "只用 Claude Code", "避免使用 MCP"], "answer": 1, "explain": "工具更新太快；理解原理、切分問題的能力才可長久遷移。"}];
+const SECS=[{"id": "s91", "label": "9.1 無頭模式完全自動化", "pfx": "9.1"}, {"id": "s92", "label": "9.2 實踐：自動開發 App", "pfx": "9.2"}, {"id": "s93", "label": "9.3 如何更進一步發展", "pfx": "9.3"}, {"id": "s94", "label": "9.4 本章小結", "pfx": "9.4"}];     // [{id,label,pfx}]
+const TITLE="第9章 把規格驅動開發機制化（實踐篇）";
+const LS="cc_"+"ch9"+"_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECS.forEach(s=>{if(st.sec[s.id])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ SECS.forEach(s=>{h+='<a onclick="jump(\''+s.id+'\')">'+s.label+'</a>';});
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.querySelector('#toc .tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function injectSecBtns(){
+ document.querySelectorAll('#main h3').forEach(h=>{const t=h.textContent;
+  SECS.forEach(s=>{ if(t.indexOf(s.pfx)===0){ h.id=s.id; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=s.id; b.setAttribute('onclick',"toggleSec('"+s.id+"')"); h.appendChild(b);} });
+ });
+}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div><button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;bindQuiz();
+}
+let answered={};
+function bindQuiz(){document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+ qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+  qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+  const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+  if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+  ex.classList.add('show');if(Object.keys(answered).length===QUIZ.length)finish();
+ }})});}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>

@@ -1,0 +1,1161 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>《實踐 Claude Code 入門》互動學習網</title>
+<style>
+:root{
+  --bg:#0f1216; --panel:#171c23; --panel2:#1e242d; --line:#2a323d;
+  --txt:#e6eaf0; --muted:#9aa6b5; --accent:#d97757; --accent2:#5b9bd5;
+  --ok:#4caf78; --bad:#e0655f; --warn:#e2b04a; --chip:#243040;
+}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;
+  background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+a{color:var(--accent2)}
+#layout{display:flex;min-height:100vh}
+#sidebar{width:310px;background:var(--panel);border-right:1px solid var(--line);
+  position:fixed;top:0;bottom:0;left:0;overflow-y:auto;padding:18px 14px}
+#sidebar h1{font-size:18px;margin:0 0 4px;color:var(--accent)}
+#sidebar .sub{font-size:12px;color:var(--muted);margin-bottom:14px}
+.search-box{width:100%;padding:9px 12px;border-radius:8px;border:1px solid var(--line);
+  background:var(--panel2);color:var(--txt);font-size:14px;margin-bottom:6px}
+#searchResults{font-size:13px;margin-bottom:10px}
+#searchResults .sr{padding:6px 8px;border-radius:6px;cursor:pointer;color:var(--accent2)}
+#searchResults .sr:hover{background:var(--chip)}
+#searchResults mark{background:var(--warn);color:#000;border-radius:3px}
+.nav-item{display:flex;align-items:center;gap:8px;padding:8px 10px;border-radius:8px;
+  cursor:pointer;font-size:14px;color:var(--txt);margin-bottom:2px}
+.nav-item:hover{background:var(--chip)}
+.nav-item.active{background:var(--accent);color:#fff}
+.nav-item .dot{width:10px;height:10px;border-radius:50%;border:1.5px solid var(--muted);flex:0 0 auto}
+.nav-item.read .dot{background:var(--ok);border-color:var(--ok)}
+.nav-item .score{margin-left:auto;font-size:11px;color:var(--muted)}
+.nav-item.active .score{color:#fff}
+.progress-wrap{margin:10px 0 16px}
+.progress-bar{height:9px;background:var(--panel2);border-radius:6px;overflow:hidden}
+.progress-fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+.progress-label{font-size:12px;color:var(--muted);margin-top:5px}
+.reset-btn{font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);
+  border-radius:6px;padding:5px 8px;cursor:pointer;margin-top:8px;width:100%}
+.reset-btn:hover{border-color:var(--bad);color:var(--bad)}
+#main{margin-left:310px;flex:1;padding:38px 48px;max-width:940px}
+.chapter{display:none;animation:fade .35s}
+.chapter.show{display:block}
+@keyframes fade{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;
+  padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 18px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:30px 0 10px;border-left:4px solid var(--accent);padding-left:12px}
+h4{font-size:17px;color:var(--accent2);margin:20px 0 6px}
+p{margin:10px 0}
+ul,ol{margin:10px 0;padding-left:24px}
+li{margin:6px 0}
+.callout{border-radius:10px;padding:14px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}
+.callout.tip{border-left:4px solid var(--warn)}
+.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}
+.callout.tip .lbl{color:var(--warn)}
+.callout.key .lbl{color:var(--accent2)}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;
+  font-family:"Consolas","Menlo",monospace;font-size:14px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:14px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:14px}
+th,td{border:1px solid var(--line);padding:8px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:22px 0;padding:18px;background:var(--panel);border:1px solid var(--line);border-radius:12px;text-align:center}
+.fig svg{max-width:100%;height:auto}
+.figcap{font-size:13px;color:var(--muted);margin-top:10px;text-align:center}
+.fig text{font-family:"Noto Sans TC","Microsoft JhengHei",sans-serif}
+.mark-read{background:var(--accent);color:#fff;border:none;border-radius:8px;padding:10px 18px;
+  font-size:15px;cursor:pointer;margin:10px 0}
+.mark-read:hover{filter:brightness(1.1)}
+.mark-read.done{background:var(--ok)}
+.quiz{margin-top:30px;border-top:2px dashed var(--line);padding-top:24px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:18px;margin:16px 0}
+.q .qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.q .qtext{font-weight:600;margin:8px 0 12px}
+.opt{display:block;padding:10px 14px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer;transition:.15s}
+.opt:hover{border-color:var(--accent2)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{margin-top:10px;padding:12px;border-radius:8px;background:var(--panel2);font-size:14px;display:none}
+.explain.show{display:block}
+.explain .r{font-weight:700}
+.explain .r.ok{color:var(--ok)}
+.explain .r.bad{color:var(--bad)}
+.quiz-score{font-size:15px;margin:14px 0;padding:12px 16px;border-radius:10px;background:var(--panel2);display:none}
+.quiz-score.show{display:block}
+@media(max-width:860px){
+  #sidebar{position:static;width:100%;height:auto}
+  #main{margin-left:0;padding:22px 18px}
+  #layout{flex-direction:column}
+}
+</style>
+</head>
+<body>
+<div id="layout">
+  <aside id="sidebar">
+    <h1>實踐 Claude Code 入門</h1>
+    <div class="sub">互動學習網 · 繁體中文（台灣資訊用語）</div>
+    <input id="search" class="search-box" placeholder="🔍 搜尋關鍵字（如：MCP、子代理）">
+    <div id="searchResults"></div>
+    <div class="progress-wrap">
+      <div class="progress-bar"><div class="progress-fill" id="pfill"></div></div>
+      <div class="progress-label" id="plabel">學習進度 0%</div>
+      <button class="reset-btn" id="resetBtn">重設進度紀錄</button>
+    </div>
+    <nav id="nav"></nav>
+  </aside>
+  <main id="main"></main>
+</div>
+<script>
+const DATA=[];
+</script>
+<!-- ====== 內容 ====== -->
+<script>
+DATA.push({
+id:"intro",nav:"前言・本書地圖",tag:"開始之前",title:"前言：這本書要帶你去哪裡",
+body:`
+<p>這本書的主角是 <b>Claude Code</b>──一個會「自己動手寫程式」的 AI 工具。但本書真正想教你的，不是把指令背起來，而是<b>「和 AI 協作的思考方式」</b>。就像學開車，重點不是記住每個按鈕，而是養成判斷路況的直覺。</p>
+<h3>本書的三個目標</h3>
+<ul>
+<li><b>自在運用 Claude Code</b>：知道它能做什麼、不能做什麼，遇到狀況知道怎麼下指令。</li>
+<li><b>在實務做出成果</b>：不是玩玩而已，而是真的拿來完成工作上的開發任務。</li>
+<li><b>建立與 AI 協作的新工作流程</b>：把 AI 變成團隊的一員，而不是偶爾用一下的玩具。</li>
+</ul>
+<div class="callout key"><span class="lbl">🎯 核心心法（全書反覆出現）</span>
+作者用三句話貫穿整本書：<b>動手做、從小開始</b>；<b>從失敗學習</b>；<b>留下紀錄</b>。
+你可以把它想成學騎腳踏車──先騎短距離（從小開始）、跌倒了找出原因（從失敗學習）、把學到的訣竅記下來（留下紀錄）。</div>
+<h3>這本書是寫給誰看的</h3>
+<p>對象是<b>有一點程式基礎、想把 AI 導入開發流程的工程師</b>。但即使你是初學者也別擔心──本互動版會把專有名詞都解釋清楚，並大量舉例。你只要願意一章一章跟著走就好。</p>
+<h3>全書地圖：兩大部分</h3>
+<table>
+<tr><th>部分</th><th>章節</th><th>在學什麼</th></tr>
+<tr><td><b>第 1 部：基礎</b></td><td>第 1～5 章</td><td>認識程式設計代理、安裝與操作 Claude Code、MCP、規格驅動開發、自動化（Claude Code Action）</td></tr>
+<tr><td><b>第 2 部：原理與機制化</b></td><td>第 6～9 章</td><td>理解運作原理、讓它照你的意圖做事、把整套開發流程變成可重複的機制</td></tr>
+</table>
+<div class="fig">
+<svg viewBox="0 0 720 230" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <rect x="10" y="20" width="340" height="190" rx="12" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/>
+ <rect x="370" y="20" width="340" height="190" rx="12" fill="var(--panel2)" stroke="var(--accent2)" stroke-width="2"/>
+ <text x="180" y="48" fill="var(--accent)" font-size="16" font-weight="bold" text-anchor="middle">第 1 部：基礎（怎麼用）</text>
+ <text x="540" y="48" fill="var(--accent2)" font-size="16" font-weight="bold" text-anchor="middle">第 2 部：原理與機制化</text>
+ <g fill="var(--txt)" text-anchor="middle">
+  <rect x="30" y="65" width="300" height="26" rx="6" fill="var(--chip)"/><text x="180" y="83">第1章 程式設計代理是什麼</text>
+  <rect x="30" y="97" width="300" height="26" rx="6" fill="var(--chip)"/><text x="180" y="115">第2章 安裝與第一次使用</text>
+  <rect x="30" y="129" width="300" height="26" rx="6" fill="var(--chip)"/><text x="180" y="147">第3章 MCP 連接外部系統</text>
+  <rect x="30" y="161" width="300" height="26" rx="6" fill="var(--chip)"/><text x="180" y="179">第4章 規格驅動開發 ★／第5章 自動化</text>
+  <rect x="390" y="65" width="300" height="26" rx="6" fill="var(--chip)"/><text x="540" y="83">第6章 理解運作原理</text>
+  <rect x="390" y="97" width="300" height="26" rx="6" fill="var(--chip)"/><text x="540" y="115">第7章 讓它照意圖運作 ★</text>
+  <rect x="390" y="129" width="300" height="26" rx="6" fill="var(--chip)"/><text x="540" y="147">第8章 機制化【設計篇】</text>
+  <rect x="390" y="161" width="300" height="26" rx="6" fill="var(--chip)"/><text x="540" y="179">第9章 機制化【實踐篇】＋附錄</text>
+ </g>
+ <text x="360" y="205" fill="var(--muted)" font-size="11" text-anchor="middle">建議由左到右、由上到下依序學習</text>
+</svg>
+<div class="figcap">圖：全書學習地圖</div></div>
+<div class="callout tip"><span class="lbl">💡 怎麼用這個學習網</span>
+每章讀完按「標記本章讀完」，左側會打勾並顯示進度。每章最後有測驗，作答後立刻看到對錯與解析。左上角可搜尋關鍵字。所有紀錄存在你的瀏覽器，下次打開還在。</div>
+
+<h3>📖 完整內容：怎麼用這個學習網</h3>
+<p>這個互動版的設計，就是要打破「讀過＝記得」的錯覺。研究與經驗都顯示：<b>主動回想（active recall）</b>遠比被動閱讀有效。所以每章請依這個節奏走：</p>
+<ol>
+<li><b>讀「導讀 + 完整內容」</b>：先建立整體圖像，再看細節。看到 <code>程式碼</code> 與指令不用背，理解它在做什麼即可。</li>
+<li><b>做「本章測驗」</b>：答錯沒關係——「先想過再看答案」記憶最深。錯題回頭再讀一次重點。</li>
+<li><b>點「標記已讀」</b>：側欄會亮綠點、上方進度條會前進。</li>
+</ol>
+<div class="callout tip"><span class="lbl">⏱️ 學習前提</span>
+建議具備：① 任一程式語言的開發經驗（1 年以上佳）② Web 基礎（HTML/CSS/JavaScript）③ 命令列基本操作 ④ Git/GitHub 基本概念。書中會出現 Python/TypeScript，但不需深入知識——跟著範例做就能懂。</div>
+<div class="callout key"><span class="lbl">🧭 全書心法再強調</span>
+<b>動手做</b>（光看不練沒用）、<b>從小開始</b>（先簡單任務再逐步加功能）、<b>從失敗學習</b>（AI 產出未必如預期，思考為什麼）、<b>留下紀錄</b>（記下有效提示與踩雷處）。這四點會在每一章反覆出現。</div>
+`,quiz:[
+ {type:"mc",q:"本書反覆強調的核心心法是哪三項？",options:["背指令、考證照、寫論文","動手做從小開始、從失敗學習、留下紀錄","只用付費方案、避免出錯、追求完美","先讀完全部理論再開始實作"],answer:1,explain:"作者用「動手做（從小開始）、從失敗學習、留下紀錄」貫穿全書，鼓勵邊做邊學、把經驗沉澱成文件。"},
+ {type:"tf",q:"本書的重點是把 Claude Code 的所有指令都背下來。",options:["正確","錯誤"],answer:1,explain:"錯誤。本書重點是「與 AI 協作的思考方式」，指令查得到，思考方式才長期受用。"},
+ {type:"mc",q:"第 1 部與第 2 部的主要差別是？",options:["第1部講硬體、第2部講軟體","第1部教怎麼用、第2部教原理與把流程機制化","兩部內容完全相同","第1部給初學者、第2部給管理者"],answer:1,explain:"第 1 部（1~5章）著重操作與基礎，第 2 部（6~9章）著重運作原理與機制化。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch1",nav:"第1章 整合進軟體工程",tag:"第 1 章",title:"將 Claude Code 整合進軟體工程",
+body:`
+<p>這一章先回答一個大哉問：<b>什麼是「程式設計代理」？它為什麼現在突然這麼紅？</b>搞懂這點，你才知道 Claude Code 在整個趨勢裡站在哪個位置。</p>
+<h3>1.1 什麼是程式設計代理（Coding Agent）</h3>
+<p>先拆兩個詞。<b>AI 代理（Agent）</b>是「能自己感知環境、做決定、採取行動」的 AI，而不是你問一句它答一句的聊天機器人。<b>程式設計代理</b>就是專門用在寫程式的 AI 代理。</p>
+<div class="callout ex"><span class="lbl">🌰 用「助手」打比方</span>
+普通聊天 AI 像<b>問路的路人</b>：你問怎麼走，它告訴你方向，但不會帶你去。<br>
+程式設計代理像<b>計程車司機</b>：你說「我要去車站」，它自己看路、轉彎、遇塞車改道，直接把你載到。</div>
+<div class="fig">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <text x="180" y="22" fill="var(--muted)" font-size="14" font-weight="bold" text-anchor="middle">一般聊天 AI（問路的路人）</text>
+ <rect x="40" y="40" width="120" height="40" rx="8" fill="var(--chip)"/><text x="100" y="65" fill="var(--txt)" text-anchor="middle">你問問題</text>
+ <rect x="200" y="40" width="120" height="40" rx="8" fill="var(--chip)"/><text x="260" y="65" fill="var(--txt)" text-anchor="middle">它回答</text>
+ <line x1="160" y1="60" x2="198" y2="60" stroke="var(--muted)" stroke-width="2" marker-end="url(#a1)"/>
+ <text x="180" y="105" fill="var(--bad)" font-size="12" text-anchor="middle">✗ 不會幫你動手執行</text>
+ <text x="540" y="22" fill="var(--accent)" font-size="14" font-weight="bold" text-anchor="middle">程式設計代理（計程車司機）</text>
+ <rect x="400" y="40" width="280" height="170" rx="10" fill="var(--panel2)" stroke="var(--accent)" stroke-width="1.5"/>
+ <g fill="var(--txt)" text-anchor="middle">
+  <rect x="420" y="55" width="110" height="30" rx="6" fill="var(--chip)"/><text x="475" y="75">理解需求</text>
+  <rect x="550" y="55" width="110" height="30" rx="6" fill="var(--chip)"/><text x="605" y="75">拆解任務</text>
+  <rect x="420" y="100" width="110" height="30" rx="6" fill="var(--chip)"/><text x="475" y="120">產生/修改程式</text>
+  <rect x="550" y="100" width="110" height="30" rx="6" fill="var(--chip)"/><text x="605" y="120">使用工具</text>
+  <rect x="485" y="145" width="110" height="30" rx="6" fill="var(--chip)"/><text x="540" y="165">遇錯自己修</text>
+ </g>
+ <text x="540" y="198" fill="var(--ok)" font-size="12" text-anchor="middle">✓ 自主完成、直接交出成果</text>
+ <defs><marker id="a1" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--muted)"/></marker></defs>
+</svg><div class="figcap">圖 1：聊天 AI 與程式設計代理的差別</div></div>
+<p>程式設計代理的五個關鍵特徵：</p>
+<ul>
+<li><b>以自然語言理解需求</b>：用中文講「幫我做一個登入頁面」它聽得懂。</li>
+<li><b>自主拆解任務</b>：自己把大任務切成「先建檔 → 寫畫面 → 測試」這種小步驟。</li>
+<li><b>產生與修改程式碼</b>：不只新建，也能改既有程式。</li>
+<li><b>使用工具</b>：讀寫檔案、執行指令、上網查資料。</li>
+<li><b>處理錯誤</b>：跑出錯時自己看錯誤訊息、嘗試修正，而不是停下等你。</li>
+</ul>
+<h4>為什麼是「現在」紅起來？</h4>
+<p>作者歸納四個原因，記成「技術成熟 ＋ 市場需要 ＋ 社會接受 ＋ 任務適合」：</p>
+<ol>
+<li><b>技術進步</b>：LLM 推論變強、能讀很長的內容（長文脈）、會使用工具。</li>
+<li><b>工程師短缺</b>：軟體需求一直增加，但工程師難招、人事成本高。</li>
+<li><b>社會接受度提高</b>：大家越來越習慣用 AI，遠距工作普及，世代交替。</li>
+<li><b>軟體開發本身好評估</b>：程式跑得動就是跑得動，產出明確、回饋循環快，很適合交給 AI。</li>
+</ol>
+<h3>1.2 程式設計代理的演進史</h3>
+<table>
+<tr><th>年份</th><th>產品</th><th>意義</th></tr>
+<tr><td>2021</td><td>GitHub Copilot</td><td>「程式碼補全」代表，邊打字邊幫你補完。</td></tr>
+<tr><td>2023</td><td>Cursor</td><td>把 AI 深度整合進編輯器（IDE）。</td></tr>
+<tr><td>2024</td><td>Devin</td><td>主打「遠端、全自動」的工程師代理。</td></tr>
+<tr><td>2025</td><td>Claude Code</td><td>CLI 型代理登場，搭配 Max 方案造成衝擊。</td></tr>
+</table>
+<div class="fig">
+<svg viewBox="0 0 720 130" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <line x1="40" y1="65" x2="680" y2="65" stroke="var(--line)" stroke-width="3"/>
+ <g text-anchor="middle">
+  <circle cx="110" cy="65" r="8" fill="var(--accent2)"/><text x="110" y="40" fill="var(--txt)" font-weight="bold">2021</text><text x="110" y="95" fill="var(--muted)">Copilot</text><text x="110" y="112" fill="var(--muted)" font-size="11">補全型</text>
+  <circle cx="280" cy="65" r="8" fill="var(--accent2)"/><text x="280" y="40" fill="var(--txt)" font-weight="bold">2023</text><text x="280" y="95" fill="var(--muted)">Cursor</text><text x="280" y="112" fill="var(--muted)" font-size="11">IDE整合型</text>
+  <circle cx="450" cy="65" r="8" fill="var(--accent2)"/><text x="450" y="40" fill="var(--txt)" font-weight="bold">2024</text><text x="450" y="95" fill="var(--muted)">Devin</text><text x="450" y="112" fill="var(--muted)" font-size="11">遠端型</text>
+  <circle cx="620" cy="65" r="10" fill="var(--accent)"/><text x="620" y="40" fill="var(--accent)" font-weight="bold">2025</text><text x="620" y="95" fill="var(--accent)" font-weight="bold">Claude Code</text><text x="620" y="112" fill="var(--muted)" font-size="11">CLI型</text>
+ </g>
+</svg><div class="figcap">圖 2：程式設計代理演進時間軸</div></div>
+<p>由此分出四種類型：①程式碼補全型 ②IDE 整合型 ③CLI 型（Claude Code 屬於這類）④遠端型。趨勢是這些功能逐漸<b>互相融合</b>。</p>
+<div class="callout tip"><span class="lbl">📖 名詞小卡：CLI</span>CLI＝Command Line Interface，命令列介面，就是黑底白字、用打字下指令的視窗。對自動化、串接其他工具非常方便──這正是 Claude Code 的強項之一。</div>
+<h3>1.3 Claude Code 的三大強項</h3>
+<ol>
+<li><b>對規格驅動開發的適性</b>：很適合「先寫清楚要做什麼，再讓 AI 照規格做」的流程（全書最重要觀念，第 4 章詳談）。</li>
+<li><b>任務拆解能力</b>：把模糊大需求拆成可執行的小任務。</li>
+<li><b>廣泛擴充性</b>：從內建工具到 MCP（第 3 章），能接上各種外部系統。</li>
+</ol>
+<div class="callout key"><span class="lbl">🔑 什麼是「規格驅動開發」</span>先把「要做什麼（What）」和「怎麼做（How）」寫成文件、取得共識，再開始寫程式。相對於「想到哪做到哪」（Vibe Coding），它能避免做到一半發現方向錯了。</div>
+<h3>1.4 工程師的工作會怎麼改變</h3>
+<p>作者用「抽象化層級的演進」來看歷史：從打孔卡 → 組合語言 → 高階語言 → 框架 → 現在的「用自然語言指揮 AI」。每一次，工程師都從「處理細節」往「處理更高層次的問題」移動。</p>
+<p><b>AI 目前還難取代的事</b>：發掘商業問題、評估商業價值、架構決策、品質管理、團隊協作。換句話說，<b>「決定要做什麼、為什麼做」比「怎麼把它寫出來」更重要了</b>。</p>
+<div class="callout ex"><span class="lbl">🌰 會的人變更會</span>資深工程師懂架構又懂業務，用 Claude Code 後產出翻倍；只會照抄的新手，因為不知道下什麼指令、看不懂 AI 哪裡錯，反而更吃力。AI 放大的是你既有的判斷力。</div>
+<div class="callout key"><span class="lbl">🔑 1.5 本章重點</span>1. 程式設計代理＝能最大發揮 LLM 能力、用於軟體開發的 AI 代理。2. 用規格驅動開發確實做出想要的東西。3. 工程師角色往「更高層次的問題解決」移動。</div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>1.1 什麼是程式設計代理</h4>
+<p><b>AI 代理（AI Agent）</b>＝針對指定目標、能自主行動以達成的系統。和傳統軟體最大的差別：不必人類逐步指示，AI 會自己推論步驟、採取行動。程式設計代理就是把這套能力用在軟體開發上。</p>
+<div class="callout key"><span class="lbl">🔑 程式設計代理的五個特徵</span>
+① 以自然語言理解需求（從「加上登入功能」這種模糊指示理解意圖）② 自主拆解任務（大目標→可執行小任務）③ 跨多檔生成/修改且保持一致 ④ 自主使用工具（Git、npm、資料庫…）⑤ 處理錯誤（看結果、出錯自我修正）。</div>
+<p><b>為何「現在」才紅？</b>四個因素：① LLM 與代理技術進步（推論強、長文脈、會用工具）② 軟體需求增、工程師短缺＆成本高 ③ 社會對 AI 的接受度提高、遠距工作普及 ④ 「軟體開發」本身產出好評估（跑得動/跑不動立刻知道、小循環、效益易感受）。</p>
+<h4>1.2 演進歷史（四個里程碑）</h4>
+<table>
+<tr><th>年份</th><th>產品</th><th>意義</th></tr>
+<tr><td>2021</td><td>GitHub Copilot</td><td>程式碼補全，歷史第一步</td></tr>
+<tr><td>2023</td><td>Cursor</td><td>IDE 整合、理解整個專案</td></tr>
+<tr><td>2024</td><td>Devin</td><td>遠端、全自動的 AI 工程師</td></tr>
+<tr><td>2025</td><td>Claude Code（＋Max 方案）</td><td>CLI 型、背景非同步、近乎無限用量</td></tr>
+</table>
+<p><b>四種類型</b>：① 程式碼補全型（Copilot）② IDE 整合型（Cursor、Windsurf）③ <b>CLI 型（Claude Code、Gemini CLI、Codex CLI）</b>④ 遠端型（Devin）。各陣營正逐漸融合多種形態，未來會更像「支援哪些功能」而非「屬於哪一類」。</p>
+<h4>1.3 Claude Code 的特徵與三大強項</h4>
+<div class="callout key"><span class="lbl">💪 三大強項</span>
+① <b>對規格驅動開發的適性</b>：能從上層文件一貫展開到設計、測試、實作。② <b>任務拆解能力</b>：把「加上電商金流」拆成設定金鑰→建資料表→建模型→實作 API→前端表單→錯誤處理→測試→更新文件。③ <b>廣泛擴充性</b>：內建工具＋MCP，並有 IDE/GitHub Actions/Slack 整合。</div>
+<h4>1.4 工程師的工作會如何改變</h4>
+<p>結論：<b>工作內容會變，但不會消失</b>。抽象化層級隨歷史不斷提高（機器語言→高階語言→物件導向→程式設計代理），每次都有人喊「程式設計師要失業」，實際只是轉向更高層次的問題。</p>
+<div class="callout tip"><span class="lbl">🤖 AI 難取代、人較擅長的事</span>
+發掘商業問題、評估商業價值（該做/不該做什麼）、架構取捨判斷、品質把關、團隊協作與文化養成。AI 是<b>提案者</b>，人是<b>決定者</b>。</div>
+<p><b>「會的人變得更會」</b>：擅長把設計力、審查力化為對 AI 的具體指示與回饋的人，生產力會被乘法放大——這也讓擅長與不擅長者的差距擴大。今後關鍵技能：快速學習力、AI 協作技能、系統思考與設計思考。</p>
+`,quiz:[
+ {type:"mc",q:"程式設計代理與一般聊天 AI 最大的差別？",options:["代理只能回答問題","代理會自己感知、決定並採取行動（讀寫檔、執行指令、修錯）","代理只能用英文","兩者完全相同"],answer:1,explain:"代理像計程車司機，自主拆解任務、使用工具、處理錯誤；聊天 AI 像路人，只給答案不代你執行。"},
+ {type:"mc",q:"Claude Code 的「三大強項」不包含？",options:["對規格驅動開發的適性","任務拆解能力","廣泛擴充性","保證程式碼零 bug"],answer:3,explain:"三大強項是規格驅動適性、任務拆解、廣泛擴充。AI 不保證零 bug，仍需人類驗證。"},
+ {type:"tf",q:"作者認為 AI 普及後，「決定要做什麼」會比「怎麼把它寫出來」更重要。",options:["正確","錯誤"],answer:0,explain:"正確。工程師角色往更高層次問題解決移動，商業判斷、架構決策是 AI 難取代的部分。"},
+ {type:"mc",q:"Claude Code 屬於哪一種類型的代理？",options:["程式碼補全型","IDE 整合型","CLI 型","純硬體型"],answer:2,explain:"Claude Code 是 CLI（命令列介面）型代理，方便自動化與串接其他工具。"},
+ {type:"mc",q:"程式設計代理「現在」才紅起來的四個原因不含？",options:["LLM 技術進步","工程師短缺、成本高","社會接受度提高","程式語言全面被淘汰"],answer:3,explain:"四原因是技術進步、工程師短缺、社會接受度提高、軟體開發本身好評估。並非程式語言被淘汰。"},
+ {type:"mc",q:"演進時間軸中，2024 年代表「遠端、全自動」的產品是？",options:["GitHub Copilot","Cursor","Devin","Claude Code"],answer:2,explain:"2024 年的 Devin 主打遠端、全自動的工程師代理。"},
+ {type:"tf",q:"程式設計代理遇到錯誤時會停下來等使用者處理。",options:["正確","錯誤"],answer:1,explain:"錯誤。代理的特徵之一就是「處理錯誤」──自己看錯誤訊息、嘗試修正，而非停下等人。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch2",nav:"第2章 Claude Code 基礎",tag:"第 2 章",title:"Claude Code 的基礎：安裝與第一次使用",
+body:`
+<p>這章很實作：把環境裝起來、跑出第一個成果。重點是<b>「動手做、從小開始」</b>。即使你還沒打算馬上安裝，了解流程也能讓你心裡有底。</p>
+<h3>2.1 Claude Code 是什麼、怎麼計費</h3>
+<p>Claude Code 是在<b>終端機</b>裡運作的程式設計代理。要使用它，需透過下列其中一種方式驗證身分（登入）：</p>
+<ul>
+<li><b>Claude.ai 訂閱方案</b>（Pro、Max、Team、Enterprise）：適合個人或團隊，按月付費。</li>
+<li><b>Claude Console（Claude API）</b>：用 API 金鑰、按用量計費，適合開發者整合。</li>
+<li><b>企業平台</b>：透過 Amazon Bedrock 或 Google Vertex AI 使用，適合已有雲端基礎的公司。</li>
+</ul>
+<div class="callout tip"><span class="lbl">💡 初學者建議</span>剛開始用訂閱方案（如 Pro/Max）最單純，不用煩惱 API 金鑰與帳單。要自動化、串接系統時再考慮 API 或企業平台。</div>
+<h3>2.2 建置動手實作環境（四步驟）</h3>
+<ol>
+<li><b>建立 GitHub 儲存庫</b>：用書附範本（Use this template）開新 repo，建議設成<b>私有（Private）</b>避免外流。</li>
+<li><b>複製（clone）到本機</b>：用 HTTPS 或 SSH 把 repo 抓到電腦。</li>
+<li><b>用 Visual Studio Code 開啟</b>：VS Code 是常見的程式編輯器。</li>
+<li><b>啟動 Dev Container</b>：點「Reopen in Container」，在乾淨、隔離的環境裡開發。</li>
+</ol>
+<div class="fig">
+<svg viewBox="0 0 720 110" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <defs><marker id="aw" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="20" y="35" width="140" height="45" rx="9" fill="var(--chip)" stroke="var(--line)"/><text x="90" y="55">①建立 GitHub</text><text x="90" y="72">儲存庫(私有)</text>
+  <rect x="200" y="35" width="140" height="45" rx="9" fill="var(--chip)" stroke="var(--line)"/><text x="270" y="55">②複製(clone)</text><text x="270" y="72">到本機</text>
+  <rect x="380" y="35" width="140" height="45" rx="9" fill="var(--chip)" stroke="var(--line)"/><text x="450" y="55">③用 VS Code</text><text x="450" y="72">開啟</text>
+  <rect x="560" y="35" width="140" height="45" rx="9" fill="var(--panel2)" stroke="var(--accent)"/><text x="630" y="55">④啟動 Dev</text><text x="630" y="72">Container</text>
+ </g>
+ <line x1="160" y1="57" x2="198" y2="57" stroke="var(--accent)" stroke-width="2" marker-end="url(#aw)"/>
+ <line x1="340" y1="57" x2="378" y2="57" stroke="var(--accent)" stroke-width="2" marker-end="url(#aw)"/>
+ <line x1="520" y1="57" x2="558" y2="57" stroke="var(--accent)" stroke-width="2" marker-end="url(#aw)"/>
+</svg><div class="figcap">圖 3：建置實作環境的四個步驟</div></div>
+<div class="callout key"><span class="lbl">🔑 名詞：Dev Container</span>等於一個「裝好所有工具、跟你的電腦隔開」的小型虛擬環境。好處：①每個人環境一致，不會「在我電腦上沒問題」②就算 AI 亂搞也傷不到主系統（資安隔離）。第 7 章會再深入。</div>
+<h3>2.3 安裝與初始設定</h3>
+<p>流程：註冊 Claude.ai → 在 VS Code 終端機安裝 Claude Code → 選深色/淺色模式 → 選驗證方式與組織 → 核准連線 → 完成。過程中它會提醒<b>資安注意事項</b>、確認你是否<b>信任目前的資料夾</b>。</p>
+<div class="callout tip"><span class="lbl">💡 驗證卡住怎麼辦</span>書中說明驗證不順時的處理方式，以及日後想變更驗證方式的做法。遇到卡關很正常，照提示重試即可──這也呼應「從失敗學習」。</div>
+<h3>2.4 第一次使用 Claude Code</h3>
+<h4>① 互動模式：輸入 <code>claude</code></h4>
+<p>進入對話畫面，像聊天一樣下指令。打「請自我介紹」，它會說明自己是 Anthropic 開發的軟體工程輔助工具，能讀寫檔案、搜尋、執行指令等。</p>
+<h4>② 無頭模式（headless）：<code>claude -p 你的指示</code></h4>
+<p><code>-p</code> 讓你<b>一行指令、不進對話畫面</b>直接拿到結果。對寫腳本、自動化超有用（第 9 章大量使用）。</p>
+<div class="callout ex"><span class="lbl">🌰 第一個成果：打磚塊遊戲</span>下指令「請在這個目錄實作打磚塊遊戲」，Claude Code 會：①整理任務 ②寫出程式 ③你叫它「啟動伺服器」就能在瀏覽器玩 ④說「把球變成紅色」讓它改程式 ⑤甚至請它「解說這段程式碼」。完整展示代理「理解→產生→執行→修改→說明」的循環。</div>
+<h3>2.5 其他基本功能</h3>
+<table>
+<tr><th>功能</th><th>它是什麼 / 為什麼有用</th></tr>
+<tr><td><b>斜線指令</b>（Slash Command）</td><td>以 <code>/</code> 開頭的快捷指令，如 <code>/init</code>。也可自訂自己的斜線指令（第 7、8 章重點）。</td></tr>
+<tr><td><b>CLAUDE.md</b></td><td>放在專案裡的<b>專案記憶</b>檔。Claude Code 每次都會讀它，等於專案的使用說明書與規則書。執行 <code>/init</code> 可自動產生。</td></tr>
+<tr><td><b>計畫模式</b>（Plan Mode）</td><td>讓它<b>先規劃、不急著動手</b>，你確認計畫後再執行，避免它埋頭做錯方向。</td></tr>
+<tr><td><b>重開工作階段</b></td><td>用 <code>--resume</code> 選項接續之前的對話，不用從頭講一遍。</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 CLAUDE.md 是全書關鍵</span>把它想成「交接給新同事的須知」：專案怎麼跑、規則是什麼、命名習慣為何。寫得好，Claude Code 就越聽得懂你的意思。第 4 章會用它來實踐規格驅動開發。</div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>2.1 概要與三種驗證方式</h4>
+<p>Claude Code 由 Anthropic 提供，以 <code>claude</code> 指令在終端機啟動。三種驗證：</p>
+<table>
+<tr><th>方式</th><th>說明</th><th>注意</th></tr>
+<tr><td>Claude.ai 訂閱</td><td>Pro/Max/Team/Enterprise</td><td>動手實作用 Pro 就夠</td></tr>
+<tr><td>Claude Console（API）</td><td>API 金鑰、用量計費</td><td>自動儲值可能無月上限</td></tr>
+<tr><td>Enterprise platforms</td><td>Amazon Bedrock / Google Vertex AI</td><td>高資安環境適用</td></tr>
+</table>
+<h4>2.2–2.3 環境建置與安裝</h4>
+<p>本書在 <b>Dev Container</b>（隔離容器）做動手實作，避免 Claude Code 誤改主機檔，並讓團隊共享一致環境。安裝與確認：</p>
+<pre><code>curl -fsSL https://claude.ai/install.sh | bash
+claude --version   # 顯示 Claude Code (2.0.37) 即成功</code></pre>
+<p>首次啟動 <code>claude</code> 會引導選擇樣式（深/淺色）、驗證方式、信任資料夾等。</p>
+<h4>2.4 第一次使用</h4>
+<div class="callout ex"><span class="lbl">🧪 互動 vs 無頭模式</span>
+互動：直接 <code>claude</code> 啟動，邊對話邊做。無頭（headless）：<code>claude -p "請自我介紹"</code> 一次指示、無對話完成並結束——這是日後自動化的基礎。</div>
+<p>示範：請它「用 index.html 和 main.js 實作打磚塊」，它會一次建立多檔；也能讓它執行指令（如 <code>npx http-server</code> 起伺服器）。用 <code>@檔名</code> 讓它參照特定檔案，例如「請解說 <code>@main.js</code>」。完全憑感覺、忘了程式碼存在的寫法叫 <b>Vibe Coding</b>。</p>
+<h4>2.5 其他基本功能</h4>
+<p><b>斜線指令</b>（以 / 開頭）：</p>
+<table>
+<tr><th>指令</th><th>用途</th></tr>
+<tr><td>/clear</td><td>清除對話歷史</td></tr>
+<tr><td>/compact</td><td>摘要對話歷史</td></tr>
+<tr><td>/init</td><td>產生 CLAUDE.md</td></tr>
+<tr><td>/resume</td><td>重開工作階段</td></tr>
+<tr><td>/exit</td><td>結束</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🧠 CLAUDE.md＝Claude Code 的「記憶」</span>
+記錄專案規則與基礎知識；Claude Code 會自動讀取目前或上層目錄的 CLAUDE.md。可用 <code>/init</code> 自動產生。它是後面規格驅動開發的核心。</div>
+<p><b>計畫模式（plan mode）</b>：按 <code>shift+tab</code> 在「一般→自動編輯→計畫」間切換；計畫模式讓 Claude Code 唯讀作業（只探索/規劃、不改檔）。<code>claude --continue</code> 或 <code>/resume</code> 可重開先前工作階段。</p>
+`,quiz:[
+ {type:"mc",q:"CLAUDE.md 這個檔案的主要用途是？",options:["記錄帳單金額","當作專案的「記憶／規則書」，Claude Code 每次都會讀取","存放遊戲存檔","加密程式碼"],answer:1,explain:"CLAUDE.md 是專案記憶，像給新同事的交接須知。執行 /init 可自動產生。"},
+ {type:"mc",q:"無頭模式（headless）的指令前綴是？",options:["-h","-p","-m","-x"],answer:1,explain:"claude -p 指示 是無頭模式，一行指令直接拿結果、不進對話畫面，適合腳本與自動化。"},
+ {type:"tf",q:"書中建議練習用的 GitHub 儲存庫設成「公開」比較好。",options:["正確","錯誤"],answer:1,explain:"錯誤。書中明確建議使用「私有（Private）」儲存庫，避免程式碼與資料外流。"},
+ {type:"mc",q:"計畫模式（Plan Mode）的好處是？",options:["讓 AI 直接動手不囉嗦","讓 AI 先規劃、你確認後再執行，避免做錯方向","自動付費升級","關閉所有工具"],answer:1,explain:"Plan Mode 讓 Claude Code 先提出計畫、經你確認再執行，避免埋頭做錯方向。"},
+ {type:"mc",q:"Dev Container 的兩個主要好處是？",options:["更快網速與更大螢幕","環境一致＋與主系統隔離（資安）","免費使用 Claude Code","自動寫好所有程式"],answer:1,explain:"Dev Container 讓團隊環境一致，並把開發環境與主系統隔離，出狀況也不傷主系統。"},
+ {type:"mc",q:"使用 Claude Code 的三種驗證（登入）方式不含？",options:["Claude.ai 訂閱方案","Claude Console（API）","企業平台（Bedrock/Vertex AI）","用臉部辨識登入終端機"],answer:3,explain:"三種方式是訂閱方案、API Console、企業平台，沒有臉部辨識。"},
+ {type:"mc",q:"想接續之前的對話工作階段，可用哪個選項？",options:["--new","--resume","--delete","--fast"],answer:1,explain:"--resume 可重新開啟、接續之前的工作階段，不用從頭講一遍。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch3",nav:"第3章 精通 MCP",tag:"第 3 章",title:"精通 MCP！讓 AI 連上外部世界",
+body:`
+<p>到目前為止，Claude Code 只能在你的電腦上讀寫檔案、執行指令。但想讓它<b>操作瀏覽器、查最新文件、連 GitHub</b>呢？這就需要 <b>MCP</b>。</p>
+<h3>3.1 MCP 入門</h3>
+<div class="callout key"><span class="lbl">🔑 一句話懂 MCP</span>MCP（Model Context Protocol）是一套<b>「AI 與外部系統溝通的統一標準插頭」</b>。就像 USB-C：以前每種裝置一條專屬線（很亂），統一規格後一個介面就能接螢幕、硬碟、充電。</div>
+<p><b>MCP 出現以前</b>：每個 AI 應用要連每個外部系統，都得各做各的接法，只有「剛好同一種接法」的組合才接得起來，混亂且重工。</p>
+<p><b>MCP 出現以後</b>：大家講同一種語言，AI 應用透過 MCP 就能接上任何支援 MCP 的外部系統。新增系統不必為每個 AI 重做一次。</p>
+<div class="fig">
+<svg viewBox="0 0 720 250" xmlns="http://www.w3.org/2000/svg" font-size="12">
+ <text x="180" y="20" fill="var(--bad)" font-size="14" font-weight="bold" text-anchor="middle">MCP 之前：每條線各做各的（亂）</text>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="30" y="45" width="90" height="28" rx="6" fill="var(--chip)"/><text x="75" y="64">AI 應用①</text>
+  <rect x="30" y="100" width="90" height="28" rx="6" fill="var(--chip)"/><text x="75" y="119">AI 應用②</text>
+  <rect x="30" y="155" width="90" height="28" rx="6" fill="var(--chip)"/><text x="75" y="174">AI 應用③</text>
+  <rect x="250" y="45" width="90" height="28" rx="6" fill="var(--panel2)"/><text x="295" y="64">系統 X</text>
+  <rect x="250" y="100" width="90" height="28" rx="6" fill="var(--panel2)"/><text x="295" y="119">系統 Y</text>
+  <rect x="250" y="155" width="90" height="28" rx="6" fill="var(--panel2)"/><text x="295" y="174">系統 Z</text>
+ </g>
+ <g stroke="var(--bad)" stroke-width="1.3" opacity="0.8">
+  <line x1="120" y1="59" x2="250" y2="59"/><line x1="120" y1="59" x2="250" y2="114"/>
+  <line x1="120" y1="114" x2="250" y2="59"/><line x1="120" y1="114" x2="250" y2="169"/>
+  <line x1="120" y1="169" x2="250" y2="114"/><line x1="120" y1="169" x2="250" y2="169"/>
+ </g>
+ <text x="185" y="210" fill="var(--muted)" text-anchor="middle">接法各不同，組合爆炸</text>
+ <text x="540" y="20" fill="var(--ok)" font-size="14" font-weight="bold" text-anchor="middle">MCP 之後：統一標準（整齊）</text>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="390" y="45" width="80" height="28" rx="6" fill="var(--chip)"/><text x="430" y="64">AI 應用①</text>
+  <rect x="390" y="100" width="80" height="28" rx="6" fill="var(--chip)"/><text x="430" y="119">AI 應用②</text>
+  <rect x="390" y="155" width="80" height="28" rx="6" fill="var(--chip)"/><text x="430" y="174">AI 應用③</text>
+  <rect x="520" y="90" width="70" height="48" rx="8" fill="var(--accent)"/><text x="555" y="119" fill="#fff" font-weight="bold">MCP</text>
+  <rect x="630" y="45" width="80" height="28" rx="6" fill="var(--panel2)"/><text x="670" y="64">系統 X</text>
+  <rect x="630" y="100" width="80" height="28" rx="6" fill="var(--panel2)"/><text x="670" y="119">系統 Y</text>
+  <rect x="630" y="155" width="80" height="28" rx="6" fill="var(--panel2)"/><text x="670" y="174">系統 Z</text>
+ </g>
+ <g stroke="var(--ok)" stroke-width="1.6">
+  <line x1="470" y1="59" x2="520" y2="105"/><line x1="470" y1="114" x2="520" y2="114"/><line x1="470" y1="169" x2="520" y2="123"/>
+  <line x1="590" y1="105" x2="630" y2="59"/><line x1="590" y1="114" x2="630" y2="114"/><line x1="590" y1="123" x2="630" y2="169"/>
+ </g>
+ <text x="550" y="210" fill="var(--muted)" text-anchor="middle">一種標準插頭通吃</text>
+</svg><div class="figcap">圖 4：MCP 出現前後的差別（像從各種接頭統一成 USB-C）</div></div>
+<h4>MCP 的架構（角色分工）</h4>
+<table>
+<tr><th>角色</th><th>白話解釋</th></tr>
+<tr><td><b>MCP 主機（Host）</b></td><td>你在用的 AI 應用程式，如 Claude Code、Claude Desktop。</td></tr>
+<tr><td><b>MCP 用戶端（Client）</b></td><td>主機內部負責對接的模組，一個主機可同時有多個用戶端。</td></tr>
+<tr><td><b>MCP 伺服器（Server）</b></td><td>實際提供能力的一方。分<b>本機伺服器</b>（操作檔案、瀏覽器）與<b>遠端伺服器</b>（如連 GitHub）。</td></tr>
+</table>
+<div class="callout ex"><span class="lbl">🌰 餐廳比喻</span>你（主機）想點菜，透過服務生（用戶端）跟廚房（伺服器）溝通。MCP 就是「點餐的標準流程」──不管哪家餐廳，服務生都聽得懂你說「我要一份 A 餐」。</div>
+<h3>3.2 在 Claude Code 試用 MCP：Playwright</h3>
+<p><b>Playwright MCP</b> 讓 Claude Code 能<b>操作瀏覽器</b>。設定並啟用後（也可用 <code>claude mcp</code> 指令設定），下指令：「請啟動伺服器，存取打磚塊遊戲並截圖。」</p>
+<p>過程中若遇到「瀏覽器還沒安裝」的錯誤，Claude Code 會<b>自己嘗試安裝瀏覽器再繼續</b>──正是代理「會自己處理錯誤」的特徵。最後它成功截圖並描述畫面內容。</p>
+<h3>3.3 幾個對開發超實用的 MCP 伺服器</h3>
+<table>
+<tr><th>MCP 伺服器</th><th>幫你做什麼</th></tr>
+<tr><td><b>Context7</b></td><td>抓取<b>最新、正確的官方文件</b>給 AI 參考，避免它用過時或亂編的 API 寫法。</td></tr>
+<tr><td><b>Serena</b></td><td>強化對程式碼的「語意理解」，在大型專案中精準找到與修改程式。</td></tr>
+<tr><td><b>Chrome DevTools</b></td><td>讓 AI 透過 Chrome 開發者工具，檢查網頁、抓 console 錯誤、看網路請求。</td></tr>
+</table>
+<p>想找更多 MCP 伺服器，可逛 <b>MCP Registry</b>（github.com/mcp）這類「MCP 商店」。</p>
+<div class="callout key"><span class="lbl">🔑 COLUMN：用 MCP？還是讓它執行指令？</span>不是所有事都要裝 MCP。若現成命令列工具就能搞定（如用 <code>gh</code> 操作 GitHub），直接讓 Claude Code 執行指令更簡單。<b>MCP 適合「需要結構化、反覆使用」的連動；一次性小事，執行指令就好。</b>第 7 章會深入比較。</div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>3.1 MCP 入門</h4>
+<p><b>MCP（Model Context Protocol）</b>是 Anthropic 提出、標準化「AI 應用程式 ↔ 外部系統」連線的協定，被喻為「AI 應用程式的 USB-C 連接埠」。</p>
+<div class="callout key"><span class="lbl">🔌 出現前 vs 出現後</span>
+出現前：每家連線方式各異，只有支援相同方式的組合才能連（N×M 的痛苦）。出現後：只要支援 MCP 就能互連，開發方各自支援 MCP 即可任意組合。</div>
+<p><b>架構鏈</b>：AI 應用程式（MCP 主機）→ 內含 MCP 用戶端 → 連本機/遠端 MCP 伺服器 → 連外部系統（瀏覽器、GitHub…）。<b>主要功能</b>有 Tools、Resources、Prompts、Roots、Sampling、Elicitation，目前主要用 <b>Tools</b>（提供模型可呼叫的工具）。</p>
+<h4>3.2 在 Claude Code 試用（Playwright MCP）</h4>
+<p>在 <code>.mcp.json</code> 設定，或用 <code>claude mcp</code> 指令。範例設定：</p>
+<pre><code>{
+  "mcpServers": {
+    "playwright": {
+      "command": "npx",
+      "args": ["@playwright/mcp@latest","--browser","chromium","--isolated","--no-sandbox"]
+    }
+  }
+}</code></pre>
+<p>重啟 Claude Code 會偵測到新 MCP 並請你核准啟用。之後就能請它「開網頁、截圖」——每個操作會逐一請求許可。</p>
+<div class="callout tip"><span class="lbl">⚠️ 安全提醒</span>瀏覽器操作可能把含機密的請求送往非預期網站，因此「未核准就自動操作」需特別小心。</div>
+<h4>3.3 實用 MCP 伺服器</h4>
+<table>
+<tr><th>MCP</th><th>用途</th></tr>
+<tr><td>Context7</td><td>取得函式庫最新/特定版本文件，彌補模型時效落差</td></tr>
+<tr><td>Serena</td><td>符號級程式碼搜尋/重新命名/追蹤，提升程式設計效能</td></tr>
+<tr><td>Chrome DevTools</td><td>效能分析、網路請求、console 訊息</td></tr>
+</table>
+<div class="callout key"><span class="lbl">💡 用 MCP？還是做成指令？</span>
+要給代理額外工具，未必非用 MCP。代理本就能執行指令，所以也可把工具做成 CLI。<b>現成工具用 MCP；專案內的小工具，常更適合做成指令。</b></div>
+`,quiz:[
+ {type:"mc",q:"形容 MCP 最貼切的比喻是？",options:["像防毒軟體","像 USB-C：AI 連接外部系統的統一標準插頭","像螢幕保護程式","像壓縮檔工具"],answer:1,explain:"MCP 是 AI 與外部系統溝通的統一標準，類似 USB-C，讓擴充與連接簡單一致。"},
+ {type:"mc",q:"MCP 架構中，實際「提供能力」（操作瀏覽器、連 GitHub）的角色是？",options:["主機（Host）","用戶端（Client）","伺服器（Server）","防火牆"],answer:2,explain:"MCP 伺服器提供實際能力，分本機與遠端兩種。主機是你用的 AI 應用，用戶端是負責對接的模組。"},
+ {type:"tf",q:"Playwright MCP 缺瀏覽器報錯時，Claude Code 會自己嘗試安裝瀏覽器再繼續。",options:["正確","錯誤"],answer:0,explain:"正確。展示代理「會自己處理錯誤」的特徵──遇錯嘗試解決，而非停下等人。"},
+ {type:"mc",q:"哪個 MCP 伺服器專門用來抓取「最新、正確的官方文件」？",options:["Context7","Playwright","Serena","Chrome DevTools"],answer:0,explain:"Context7 抓取最新官方文件給 AI 參考，避免用過時或亂編的 API 寫法。"},
+ {type:"mc",q:"關於「用 MCP 還是直接執行指令」，書中觀點較接近？",options:["所有事都一定要裝 MCP","一次性小事可直接執行指令；結構化、反覆使用的連動才用 MCP","永遠不要用 MCP","MCP 只能用一次"],answer:1,explain:"看取捨：現成 CLI 工具能解決的小事直接執行；MCP 適合結構化、反覆使用的連動。"},
+ {type:"tf",q:"MCP 出現以前，不同 AI 應用連接外部系統的方式是統一的。",options:["正確","錯誤"],answer:1,explain:"錯誤。MCP 之前各做各的接法，造成組合爆炸與重工；MCP 才帶來統一標準。"},
+ {type:"mc",q:"Playwright MCP 主要讓 Claude Code 獲得什麼能力？",options:["操作瀏覽器（存取網頁、截圖）","加密檔案","管理資料庫","發送電子郵件"],answer:0,explain:"Playwright MCP 讓 Claude Code 能操作瀏覽器，例如存取頁面並截圖。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch4",nav:"第4章 規格驅動開發",tag:"第 4 章 ★核心",title:"向達人學習規格驅動開發",
+body:`
+<p>這是<b>全書最重要的一章</b>。用一個故事告訴你：為什麼「想到哪做到哪」會失敗，以及「先講清楚規格再做」為什麼成功。讀懂這章，你就抓到了和 AI 協作的精髓。</p>
+<h3>4.2 先憑感覺做做看吧（Vibe Coding 的陷阱）</h3>
+<p>書中先示範常見做法：<b>Vibe Coding（憑感覺寫程式）</b>。下一句模糊指令「幫我做一個任務管理 App，能新增、刪除、標記完成」，很快做出來，看起來很爽。但接著災難開始：</p>
+<table>
+<tr><th>你後來補的需求</th><th>引發的問題</th></tr>
+<tr><td>「解決任務會消失的問題」</td><td>問題 1：需求／規格一開始就缺漏</td></tr>
+<tr><td>「改成存到資料庫」</td><td>問題 2：規格落差一直補不完、講不清楚</td></tr>
+<tr><td>「讓任務可編輯」「加優先度高中低」</td><td>問題 3：程式越改越複雜、脆弱，一加新功能就壞</td></tr>
+<tr><td>（沒人寫文件）</td><td>問題 4：沒文件，沒人（包括 AI）記得當初為什麼這樣做</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 失敗的四個根本原因</span>①沒有明確設計的臨時湊合實作 ②與 AI 共識不足 ③低品質程式碼不斷增加 ④課題被潛藏、擱置。<b>一句話：因為一開始沒講清楚「要做什麼、怎麼做」，所以每步都在補破網。</b></div>
+<div class="fig">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <defs><marker id="ar" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="currentColor"/></marker></defs>
+ <text x="180" y="20" fill="var(--bad)" font-size="14" font-weight="bold" text-anchor="middle">Vibe Coding：邊想邊做</text>
+ <g color="var(--bad)" fill="var(--txt)" text-anchor="middle">
+  <rect x="40" y="35" width="90" height="30" rx="6" fill="var(--chip)"/><text x="85" y="55">模糊指令</text>
+  <rect x="40" y="80" width="90" height="30" rx="6" fill="var(--chip)"/><text x="85" y="100">急著做</text>
+  <rect x="40" y="125" width="90" height="30" rx="6" fill="var(--chip)"/><text x="85" y="145">一直補破網</text>
+  <line x1="85" y1="65" x2="85" y2="78" stroke="var(--bad)" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="85" y1="110" x2="85" y2="123" stroke="var(--bad)" stroke-width="2" marker-end="url(#ar)"/>
+ </g>
+ <text x="230" y="100" fill="var(--bad)" font-size="22" text-anchor="middle">💥</text>
+ <text x="180" y="185" fill="var(--muted)" text-anchor="middle">越改越脆弱、無紀錄</text>
+ <line x1="360" y1="20" x2="360" y2="180" stroke="var(--line)" stroke-dasharray="4"/>
+ <text x="540" y="20" fill="var(--ok)" font-size="14" font-weight="bold" text-anchor="middle">規格驅動開發：先講清楚再做</text>
+ <g color="var(--ok)" fill="var(--txt)" text-anchor="middle">
+  <rect x="420" y="35" width="110" height="30" rx="6" fill="var(--chip)"/><text x="475" y="55">寫清楚 What/How</text>
+  <rect x="420" y="80" width="110" height="30" rx="6" fill="var(--chip)"/><text x="475" y="100">建立文件共識</text>
+  <rect x="420" y="125" width="110" height="30" rx="6" fill="var(--chip)"/><text x="475" y="145">照規格實作</text>
+  <line x1="475" y1="65" x2="475" y2="78" stroke="var(--ok)" stroke-width="2" marker-end="url(#ar)"/>
+  <line x1="475" y1="110" x2="475" y2="123" stroke="var(--ok)" stroke-width="2" marker-end="url(#ar)"/>
+ </g>
+ <text x="620" y="100" fill="var(--ok)" font-size="22" text-anchor="middle">✓</text>
+ <text x="560" y="185" fill="var(--muted)" text-anchor="middle">可擴充、可追溯</text>
+</svg><div class="figcap">圖 5：Vibe Coding（沒設計圖砌磚）vs 規格驅動開發（先畫設計圖）</div></div>
+<h3>4.3 規格驅動開發的基礎：建立「共識」</h3>
+<p>達人登場後先把問題<b>可視化</b>，再建立共識。共識分兩個軸：</p>
+<table>
+<tr><th>What（要做什麼）</th><th>How（怎麼做）</th></tr>
+<tr><td>使用者的課題是什麼？</td><td>用什麼技術？</td></tr>
+<tr><td>提供什麼價值？</td><td>什麼樣的架構？</td></tr>
+<tr><td>成功如何定義？</td><td>如何保證品質？</td></tr>
+<tr><td>優先順序怎麼排？</td><td>如何部署？</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 文件是「記憶裝置」</span>AI 對話記憶有限、會忘。把 What 與 How 寫成文件，等於給 AI（和未來的你）一個<b>永久的記憶裝置</b>，呼應「留下紀錄」。</div>
+<h4>兩種文件：永續性文件 vs. 作業單位文件</h4>
+<table>
+<tr><th></th><th>永續性文件（steering）</th><th>作業單位文件（specs／引導檔）</th></tr>
+<tr><td>定義什麼</td><td>整個專案「要做什麼、怎麼做」的恆久規範</td><td>「這一次任務」要做什麼</td></tr>
+<tr><td>更新頻率</td><td>很少，只在基本設計大改時更新</td><td>每個新任務建一個新的</td></tr>
+<tr><td>比喻</td><td>專案的「北極星」（指引方向）</td><td>單次任務的「施工單」</td></tr>
+<tr><td>包含</td><td>產品需求定義書、機能設計書、技術規格書、儲存庫結構、開發指南、通用語言定義</td><td>本次需求、變更設計、任務清單</td></tr>
+</table>
+<h3>4.4～4.8 達人示範的完整流程</h3>
+<ol>
+<li><b>構思要做什麼（4.4）</b>：先和 AI <b>腦力激盪</b>。AI 提點子，<b>人類收斂、做決定</b>。</li>
+<li><b>製作產品需求定義書 PRD（4.5）</b>：寫清楚產品願景、目標使用者（甚至設定具體人物誌「田中太郎，35 歲全端工程師」）、成功指標、功能/非功能需求、驗收條件。關鍵動作：<b>請 Claude Code 自己審查 PRD</b>，它會挑出「『活躍使用者』怎麼計算？隱私怎辦？」這類盲點。</li>
+<li><b>整備其餘永續性文件（4.6）</b>：如機能設計書（架構、技術堆疊、資料模型、演算法）。每完成一份<b>先取得你的核准</b>再進下一份。</li>
+<li><b>製作引導檔、推進實作（4.7、4.8）</b>：建立「這次只聚焦核心功能」的作業文件，列分階段任務清單（基盤→資料層→服務層→介面→整合測試），依清單實作並做品質檢查（型別檢查、測試、Lint）。</li>
+</ol>
+<div class="callout key"><span class="lbl">🔑 貫穿本章的「五個教訓」</span>①<b>臨時湊合的實作會產生負債</b> ②<b>AI 是最佳的對打對象</b>（AI 提案、人類決定） ③<b>AI 不只用來寫程式</b>，也能審查文件/程式碼、做測試與驗證 ④<b>文件是永遠指方向的北極星</b> ⑤<b>盡早展示能動的東西</b>（先做 MVP）。</div>
+<h3>4.9～4.10 回顧：Before vs After</h3>
+<table>
+<tr><th>Before（Vibe Coding）</th><th>After（規格驅動開發 + CLAUDE.md）</th></tr>
+<tr><td>指令模糊、共識不足</td><td>先寫清楚 What/How、取得共識</td></tr>
+<tr><td>越改越亂、一加功能就壞</td><td>有文件當依據，擴充有方向</td></tr>
+<tr><td>沒紀錄、無法回溯</td><td>永續性＋作業文件，可追溯決策</td></tr>
+</table>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>4.2 先憑感覺做做看（Vibe Coding 的四個坑）</h4>
+<p>主角田中先生憑感覺開發任務管理 App，依序踩到：① 需求/規格缺漏（任務會消失）② 規格落差傳達不了（想要雙擊編輯卻做成按鈕）③ 程式碼變脆弱（改一處壞別處）④ 缺文件，同事也救不了。</p>
+<div class="callout tip"><span class="lbl">🧨 失敗根因</span>不是工具不好，而是<b>人與 AI 之間缺少「就 What（要做什麼）與 How（怎麼做）達成共識」的流程</b>。</div>
+<h4>4.3 規格驅動開發的基礎</h4>
+<div class="callout key"><span class="lbl">🎯 核心：共識的兩個軸</span>
+<b>What</b>（使用者課題、價值、成功定義、優先序）以產品需求規格書、機能設計書表達；<b>How</b>（技術、架構、品質、部署）以架構設計書、開發指南表達。<b>文件是「記憶裝置」，達成共識才是本質。</b></div>
+<p><b>兩類文件、兩種生命週期</b>：</p>
+<table>
+<tr><th>類型</th><th>位置</th><th>定位</th></tr>
+<tr><td>永續性文件</td><td>docs/</td><td>整體 What/How，少更新，是「北極星」</td></tr>
+<tr><td>引導檔</td><td>.steering/[日期]-[標題]/</td><td>「這次做什麼」，含 requirements/design/tasklist</td></tr>
+</table>
+<p>由 <code>CLAUDE.md</code> 編排整個流程與規則：定義文件結構、作業順序、要「一次做一份、逐處確認核准」。</p>
+<h4>4.4–4.8 從構想到 MVP</h4>
+<p>流程：與 AI 對打（腦力激盪）收斂想法 → 生成並逐份審查 PRD 等永續性文件 → 建引導檔（requirements/design/tasklist）→ 依任務清單實作 → 驗證。其中 <b>讓 Claude 自己審查自己的 PRD</b>（附上檢查觀點）能在人類審查前先發現問題。</p>
+<div class="callout key"><span class="lbl">🏆 五個教訓</span>
+① 臨時湊合的實作會產生負債 ② AI 是最佳對打（腦力激盪）對象 ③ AI 也用於審查/測試/驗證 ④ 文件是永遠指方向的北極星 ⑤ 盡早展示能動的東西（重視 MVP）。</div>
+`,quiz:[
+ {type:"mc",q:"Vibe Coding 最終會失敗，最根本的原因是？",options:["AI 不夠聰明","一開始沒講清楚「要做什麼、怎麼做」，每步都在補破網","電腦太慢","沒付費升級"],answer:1,explain:"失敗根因是缺乏明確設計、與 AI 共識不足、低品質程式碼累積、問題被擱置──都源自沒建立 What/How 共識。"},
+ {type:"mc",q:"「永續性文件」與「作業單位文件」的差別是？",options:["兩者一樣","永續性文件是專案恆久規範（北極星）、少更新；作業文件是單次任務施工單、每次新建","永續性給 AI、作業給人","永續性要付費"],answer:1,explain:"永續性文件定義整個專案的 What/How，是少更新的北極星；作業文件針對單次任務，每個新任務建一個。"},
+ {type:"tf",q:"在規格驅動開發中，AI 是「決定者」，人類只負責執行。",options:["正確","錯誤"],answer:1,explain:"錯誤。教訓二：AI 是「提案者」，人類是「決定者」。AI 給點子，拍板的是人。"},
+ {type:"mc",q:"「教訓三」指出，AI 除了寫程式還能做什麼？",options:["只能寫程式","也能做文件審查、程式碼審查、測試與運作驗證","只能聊天","只能算數學"],answer:1,explain:"AI 不只用於寫程式，也用於文件/程式碼審查與測試/驗證。書中示範請 AI 自審 PRD 挑盲點。"},
+ {type:"mc",q:"「教訓五：盡早展示能動的東西」對應的做法是？",options:["先把所有功能做完才給人看","先做出最小可動版本（MVP），及早看到成果並修正","等文件完美才開始","完全不做測試"],answer:1,explain:"盡早做出 MVP、及早展示，更快獲得回饋、及早修正方向。"},
+ {type:"mc",q:"建立永續性文件時，達人建議的做法是？",options:["一次全部生成、不需確認","每完成一份先取得使用者核准，再進下一份","全部交給 AI 不看","只寫一份就好"],answer:1,explain:"每完成一份永續性文件先取得核准再進下一份，確保方向正確、避免累積錯誤。"},
+ {type:"tf",q:"規格驅動開發前期會花較多時間寫文件，但後續擴充更有依據、可追溯。",options:["正確","錯誤"],answer:0,explain:"正確。像先畫設計圖再施工：前期慢一點，之後每次擴建都有依據，避免越改越亂。"},
+ {type:"mc",q:"PRD（產品需求定義書）通常不包含下列哪一項？",options:["產品願景與目標使用者","成功指標、功能/非功能需求","驗收條件","伺服器機房的水電費明細"],answer:3,explain:"PRD 涵蓋願景、使用者、成功指標、功能/非功能需求、驗收條件等，不含機房水電費。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch5",nav:"第5章 Claude Code Action",tag:"第 5 章",title:"活用 Claude Code Action：讓 AI 自動上工",
+body:`
+<p>前面都是你坐電腦前一句句下指令。這章要讓它<b>「自動」</b>運作：當 GitHub 上發生某件事（開 Issue、送 PR），AI 就自動跳出來幫你分類、回覆、審查。這就是<b>遠端型代理</b>的威力。</p>
+<h3>5.1～5.2 什麼是 Claude Code Action</h3>
+<div class="callout key"><span class="lbl">🔑 先懂 GitHub Actions</span>GitHub Actions 是 GitHub 內建的<b>自動化機制</b>：設定「當發生某事件時，自動執行某流程」。例如「每次有人 push 程式碼，就自動跑測試」。</div>
+<p><b>Claude Code Action</b> 就是把 Claude Code 接到 GitHub Actions 上。常見觸發情境：</p>
+<table>
+<tr><th>觸發事件</th><th>Claude Code 自動做的事</th></tr>
+<tr><td>有人建立 Issue</td><td>自動分類、貼標籤</td></tr>
+<tr><td>有人在 Issue 留言（@它）</td><td>自動回覆、甚至動手實作</td></tr>
+<tr><td>有人送出 Pull Request</td><td>自動審查程式碼、留下意見</td></tr>
+</table>
+<div class="callout tip"><span class="lbl">📖 名詞小卡：Issue / PR</span><b>Issue</b>＝待辦事項或問題回報（像「許願池／報修單」）。<b>Pull Request（PR）</b>＝把改好的程式碼提交、請人審查合併的請求（像「請主管簽核的修改提案」）。</div>
+<h3>5.3 實際運作 Claude Code Action</h3>
+<p>流程：設定 GitHub CLI（<code>gh</code>）→ 安裝 Claude 的 GitHub App → 自動建立兩個工作流程：<b>Claude Code</b>（接受指令做事）與 <b>Claude Code Review</b>（自動審查 PR）。</p>
+<div class="callout ex"><span class="lbl">🌰 丟一句「這個交給你」</span>開一個 Issue 寫「幫專案補上說明文件」，留言「這個交給你」，Claude Code 就自動啟動、實作、開 PR 把文件補好。你只要去 GitHub Actions 的日誌看它做了什麼。</div>
+<h3>5.4 環境代理（Ambient Agent）：讓 AI 先一步行動</h3>
+<div class="callout key"><span class="lbl">🔑 為什麼需要「自動」</span>每件事都「人下指令 → AI 才動」，那<b>人類的指示就成了瓶頸</b>。想規模化（同時跑很多任務）時瓶頸更明顯。</div>
+<p><b>環境代理（Ambient Agent）</b>：不再由人主動下令，而是<b>由「事件」觸發 AI 行動</b>，AI 做完再回頭通知、提問或請人審查。人從「每件事都要開口」變成「只在關鍵時刻做決定」。</p>
+<div class="fig">
+<svg viewBox="0 0 720 170" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <defs><marker id="a5" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="40" y="60" width="120" height="46" rx="9" fill="var(--chip)"/><text x="100" y="80">事件發生</text><text x="100" y="97" font-size="10" fill="var(--muted)">開Issue/送PR</text>
+  <rect x="230" y="60" width="140" height="46" rx="9" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="300" y="80" fill="var(--accent)" font-weight="bold">AI 自動行動</text><text x="300" y="97" font-size="10" fill="var(--muted)">分類/實作/審查</text>
+  <rect x="440" y="60" width="120" height="46" rx="9" fill="var(--chip)"/><text x="500" y="80">通知/提問</text>
+  <rect x="600" y="60" width="100" height="46" rx="9" fill="var(--chip)"/><text x="650" y="80">人做決定</text>
+ </g>
+ <g stroke="var(--accent)" stroke-width="2">
+  <line x1="160" y1="83" x2="228" y2="83" marker-end="url(#a5)"/>
+  <line x1="370" y1="83" x2="438" y2="83" marker-end="url(#a5)"/>
+  <line x1="560" y1="83" x2="598" y2="83" marker-end="url(#a5)"/>
+ </g>
+ <text x="360" y="140" fill="var(--muted)" text-anchor="middle">由事件驅動，人只在關鍵時刻介入</text>
+</svg><div class="figcap">圖 6：環境代理（Ambient Agent）流程</div></div>
+<div class="callout ex"><span class="lbl">🌰 自動 Issue 分類</span>①先寫自訂斜線指令 <code>/label-issue</code>（教 AI 怎麼分類）②設定工作流程 <code>issue-triage.yml</code>，讓「每當有新 Issue」就自動呼叫它。結果：新 Issue 一建立就<b>自動被貼上正確標籤</b>，完全不用人動手。</div>
+<div class="callout key"><span class="lbl">🔑 COLUMN：把 Claude Code 當「通用代理」</span>它不只能寫程式。因為會使用工具、處理檔案、執行指令，可當<b>泛用自動化代理</b>──寫報告、整理資料、跑例行流程都行。</div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>5.1–5.2 遠端代理與 Claude Code Action</h4>
+<p>Claude Code 基底是 CLI 型，但放到 <b>GitHub Actions</b> 執行就成了「遠端型」代理。GitHub Actions 在 <code>.github/workflows/*.yml</code> 設定，以事件（push、issue、PR…）觸發。</p>
+<h4>5.3 動手設定</h4>
+<p>用 <code>/install-github-app</code> 安裝，會建立兩個工作流程：</p>
+<table>
+<tr><th>工作流程</th><th>觸發時機</th></tr>
+<tr><td>Claude Code</td><td>Issue/留言含 <code>@claude</code> 時</td></tr>
+<tr><td>Claude Code Review</td><td>PR 建立/更新時自動審查</td></tr>
+</table>
+<div class="callout tip"><span class="lbl">⚠️ 與他人共用</span>Pro/Max 訂閱的 token 不可分享；多人共用請改用 API 金鑰或 Bedrock/Vertex AI。</div>
+<h4>5.4 以事件讓 AI 先一步行動</h4>
+<div class="callout key"><span class="lbl">🌊 環境代理（Ambient Agent）</span>
+「人類下指示」是<b>瓶頸</b>——人不下令 AI 就不動。改成「<b>以事件自動觸發</b>」（如 PR 建立就自動審查、Issue 建立就自動分類），AI 比人先一步行動、必要時才請人介入，活用更具規模。</div>
+<p>實作範例：Issue 分類——加 <code>.claude/commands/label-issue.md</code>（自訂斜線指令）＋ <code>issue-triage.yml</code>，Issue 一建立就自動貼標籤。延伸：監控服務偵測錯誤→自動建 Issue→讓 Claude 一次調查；或用 Zapier 以各種事件觸發。</p>
+`,quiz:[
+ {type:"mc",q:"Claude Code Action 最主要解決什麼問題？",options:["讓電腦更快","讓 Claude Code 隨 GitHub 事件（Issue、PR）自動上工，不必每次手動下指令","免費用 GitHub","加密儲存庫"],answer:1,explain:"Claude Code Action 把 Claude Code 接上 GitHub Actions，在建立 Issue、留言、送 PR 等事件時自動執行。"},
+ {type:"mc",q:"「環境代理（Ambient Agent）」的核心概念是？",options:["人下每個指令 AI 才動","由「事件」觸發 AI 行動，做完再通知或請人決定，減少人類瓶頸","AI 完全不需要人","只在離線運作"],answer:1,explain:"環境代理由事件驅動，讓人從「每件事都要開口」轉為「只在關鍵時刻做決定」。"},
+ {type:"tf",q:"Pull Request（PR）大致相當於「請人審查並合併修改」的提案。",options:["正確","錯誤"],answer:0,explain:"正確。PR 是把改好的程式碼提交、請人審查合併的請求；Issue 是待辦或問題回報。"},
+ {type:"mc",q:"自動 Issue 分類的實作用到哪兩個東西搭配？",options:["自訂斜線指令（/label-issue）＋ 工作流程設定（issue-triage.yml）","防火牆＋VPN","兩台電腦","付費外掛＋雲端硬碟"],answer:0,explain:"先寫自訂斜線指令教 AI 分類，再用工作流程讓新 Issue 自動觸發它。"},
+ {type:"mc",q:"設定 Claude Code Action 時自動建立的兩個工作流程是？",options:["備份與還原","Claude Code（接受指令）與 Claude Code Review（自動審查 PR）","防毒與掃描","上傳與下載"],answer:1,explain:"安裝後自動建立 Claude Code 與 Claude Code Review 兩個工作流程。"},
+ {type:"tf",q:"如果每件事都要人先下指令 AI 才動，人類的指示反而會成為規模化的瓶頸。",options:["正確","錯誤"],answer:0,explain:"正確。這正是環境代理要解決的問題──改由事件驅動，突破人類指示的瓶頸。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch6",nav:"第6章 運作原理",tag:"第 6 章",title:"理解 Claude Code 的運作原理",
+body:`
+<p>進入第 2 部。前面學「怎麼用」，這章學「<b>它到底怎麼運作</b>」。懂了原理，你才知道它為什麼有時會「忘記指示」「不照你意思做」──這也是第 7 章要解決的。</p>
+<h3>6.1 把 Claude Code 理解為「AI 代理」</h3>
+<p>所有 AI 代理都跑同一個循環，記成<b>「環→知→憶→推→行」</b>，再回到環境，不斷重複：</p>
+<table>
+<tr><th>要素</th><th>白話</th><th>Claude Code 的對應</th></tr>
+<tr><td><b>環境</b></td><td>它作用的場所</td><td>你的檔案系統、執行環境（終端機）</td></tr>
+<tr><td><b>知覺</b></td><td>從環境接收資訊</td><td>讀檔案內容、看指令執行結果、看錯誤訊息</td></tr>
+<tr><td><b>記憶</b></td><td>記住過去經驗與知識</td><td>短期＝情境視窗；長期＝外部檔案（CLAUDE.md）</td></tr>
+<tr><td><b>推論</b></td><td>決定下一步</td><td>LLM 根據目前資訊判斷該做什麼</td></tr>
+<tr><td><b>行動</b></td><td>對環境施加作用</td><td>寫檔案、執行指令、呼叫工具</td></tr>
+</table>
+<div class="fig">
+<svg viewBox="0 0 720 290" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <defs><marker id="al" markerWidth="10" markerHeight="10" refX="7" refY="3.5" orient="auto"><path d="M0,0 L7,3.5 L0,7 Z" fill="var(--accent)"/></marker></defs>
+ <g text-anchor="middle">
+  <circle cx="360" cy="50" r="38" fill="var(--panel2)" stroke="var(--accent2)" stroke-width="2"/><text x="360" y="48" fill="var(--accent2)" font-weight="bold">知覺</text><text x="360" y="66" fill="var(--muted)" font-size="10">看結果/錯誤</text>
+  <circle cx="600" cy="160" r="38" fill="var(--panel2)" stroke="var(--accent2)" stroke-width="2"/><text x="600" y="158" fill="var(--accent2)" font-weight="bold">推論</text><text x="600" y="176" fill="var(--muted)" font-size="10">決定下一步</text>
+  <circle cx="500" cy="255" r="38" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="500" y="253" fill="var(--accent)" font-weight="bold">行動</text><text x="500" y="271" fill="var(--muted)" font-size="10">寫檔/執行</text>
+  <circle cx="220" cy="255" r="38" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="220" y="253" fill="var(--accent)" font-weight="bold">環境</text><text x="220" y="271" fill="var(--muted)" font-size="10">檔案/終端機</text>
+  <circle cx="120" cy="160" r="38" fill="var(--chip)" stroke="var(--warn)" stroke-width="2"/><text x="120" y="158" fill="var(--warn)" font-weight="bold">記憶</text><text x="120" y="176" fill="var(--muted)" font-size="10">短期+長期</text>
+ </g>
+ <g stroke="var(--accent)" stroke-width="2.2" fill="none">
+  <path d="M396,68 Q500,90 575,130" marker-end="url(#al)"/>
+  <path d="M598,198 Q560,240 538,243" marker-end="url(#al)"/>
+  <path d="M462,260 Q360,285 258,262" marker-end="url(#al)"/>
+  <path d="M188,235 Q140,210 138,196" marker-end="url(#al)"/>
+  <path d="M150,135 Q250,80 322,58" marker-end="url(#al)"/>
+ </g>
+ <text x="360" y="160" fill="var(--txt)" font-size="14" font-weight="bold" text-anchor="middle">AI 代理循環</text>
+</svg><div class="figcap">圖 7：AI 代理運作循環（記憶貫穿全程，不斷重複）</div></div>
+<div class="callout ex"><span class="lbl">🌰 一個完整循環：跑測試</span>行動「執行測試」→ 環境「測試失敗」→ 知覺「讀到錯誤訊息」→ 推論「該去看程式碼哪錯」→ 行動「讀程式碼、修正」→「重新測試」→ 環境「成功」→ 行動「更新文件」。這就是代理的基本動作模式。</div>
+<div class="callout key"><span class="lbl">🔑 兩個關鍵記憶觀念</span><b>短期記憶＝情境視窗（context window）</b>：這次對話能裝下的內容上限，像桌面大小，東西太多會擠掉舊的。<b>長期記憶＝外部記憶裝置</b>：寫進檔案（CLAUDE.md），不會因對話變長而消失。另外，<b>知覺若不正確，後面推論與行動都會錯</b>；<b>推論的品質決定代理的智能</b>。</div>
+<div class="callout tip"><span class="lbl">💡 想讓它想更深：思考預算關鍵字</span>在指示裡加特定關鍵字可提高「思考預算」，例如 <code>ultrathink</code> 代表最高等級。需要它謹慎處理複雜問題時很有用。</div>
+<h3>6.2 活用程式設計代理的三大課題</h3>
+<h4>課題 1：忘記過去的指示（對應「記憶」）</h4>
+<ul>
+<li><b>每次工具執行都消耗記憶</b>：每讀一檔、跑一指令，結果都塞進情境視窗，慢慢把舊指示擠出去。</li>
+<li><b>情境視窗自動壓縮</b>：滿了會自動「摘要壓縮」舊內容，壓縮時可能<b>遺失重要細節</b>。</li>
+<li><b>Context Rot（情境腐化）</b>：情境一大，LLM 本身表現就下降──不是裝不下，是「東西太多反而變笨」。</li>
+</ul>
+<div class="callout ex"><span class="lbl">🌰 比喻</span>像你開了 50 個瀏覽器分頁，到後來找不到最早那個重要頁面，腦子也亂了。解法是「把重要的記到外部筆記」──正是第 7 章的對策。</div>
+<h4>課題 2：不照意圖運作（對應「推論／指示」）</h4>
+<ul>
+<li><b>隱性期待未明示</b>：專家心裡有套習慣流程（先用 Grep 搜尋類似既有功能、讀既有實作、沿用錯誤處理樣式），但這些「想當然耳」沒寫進 CLAUDE.md，AI 當然不知道。</li>
+<li><b>指示在資料間衝突</b>：architecture.md 說一套、development-guidelines.md 說另一套、既有程式碼又是第三套，AI 不知道聽誰的。</li>
+</ul>
+<h4>課題 3：無法與外部系統妥善連動（對應「行動／環境」）</h4>
+<p>它能用的工具有限，碰到需連外部系統的情境就卡住──要靠 MCP 或指令式連動補足（第 7 章詳談）。</p>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>6.1 把 Claude Code 理解為 AI 代理</h4>
+<div class="callout key"><span class="lbl">🧩 五要素</span>
+<b>環境</b>（作用對象：檔案系統、執行環境）→ <b>知覺</b>（取得資訊，主要是工具執行結果）→ <b>記憶</b>（短期＝情境視窗；長期＝外部檔案/DB）→ <b>推論</b>（LLM 決定下一步用哪個工具）→ <b>行動</b>（所有行動都是「工具的執行」）。Claude Code 就是「不斷依知覺選擇工具」的代理。</div>
+<h4>6.2 活用時的三大課題</h4>
+<p><b>課題1：忘記過去指示。</b>根因＝情境視窗容量限制＋Context Rot。長任務中每次工具執行都消耗記憶（測試日誌可達上萬 token），達約 95% 觸發<b>自動壓縮</b>、把細節摘要掉（architecture.md 細節、設計理由、試錯歷史可能流失）。</p>
+<div class="callout tip"><span class="lbl">📉 Context Rot（情境腐化）</span>
+輸入越長，LLM 正確參照/理解的能力越下降。即使有百萬 token 上限，<b>實際能發揮效能的輸入遠比上限短</b>——所以重點是「用更少 token 高效傳遞」，而非塞滿。</div>
+<p><b>課題2：不照意圖運作。</b>不是遺忘——它讀過規則卻選了別的做法。根因是<b>隱性期待沒寫出來</b>（專家覺得理所當然的步驟沒文件化），或<b>多份資料指示衝突</b>（architecture.md 與 guidelines.md 矛盾）。</p>
+<p><b>課題3：無法妥善連動外部系統。</b>即使註冊 MCP，代理也未必選到期待的工具——取決於 MCP 工具描述是否具體。</p>
+<div class="callout ex"><span class="lbl">🧠 想更深推論？</span>在提示加 <code>think</code>（約 4k）/ <code>megathink</code>（約 10k）/ <code>ultrathink</code>（約 32k token）提高思考預算。</div>
+`,quiz:[
+ {type:"mc",q:"AI 代理的基本運作循環，正確順序是？",options:["行動→環境→推論→記憶→知覺","環境→知覺→（記憶）→推論→行動，再回到環境","推論→行動→知覺→環境→記憶","記憶→環境→行動→推論→知覺"],answer:1,explain:"代理感知環境（知覺）、結合記憶做推論、採取行動改變環境，再從新環境感知，如此循環。"},
+ {type:"mc",q:"「情境視窗（context window）」相當於哪種記憶？",options:["長期記憶","短期記憶（容量有限，太多會擠掉舊內容）","永久記憶","完全不算記憶"],answer:1,explain:"情境視窗是短期記憶，容量有限；長期記憶要靠外部檔案（如 CLAUDE.md）。"},
+ {type:"tf",q:"「Context Rot（情境腐化）」是指情境裝不下、空間不足的問題。",options:["正確","錯誤"],answer:1,explain:"錯誤。Context Rot 是指情境變大時 LLM 表現本身下降──東西太多反而變笨，不是單純空間不足。"},
+ {type:"mc",q:"「課題 1：忘記過去的指示」對應 AI 代理的哪個要素？",options:["環境","記憶","行動","知覺"],answer:1,explain:"忘記指示是記憶問題：工具執行消耗情境、自動壓縮遺失細節、情境腐化都與記憶有關。"},
+ {type:"mc",q:"「課題 2：不照意圖運作」的常見原因不含？",options:["專家的隱性期待沒寫進 CLAUDE.md","不同文件間指示互相衝突","網路斷線","AI 不知道該聽哪份資料"],answer:2,explain:"課題 2 源於隱性期待未明示與資料間衝突；網路斷線屬於課題 3（外部連動）。"},
+ {type:"mc",q:"想讓 Claude Code 推論更深，可在指示加上哪類關鍵字？",options:["fast","ultrathink","silent","cheap"],answer:1,explain:"ultrathink 代表最高的思考預算，適合需要謹慎處理的複雜問題。"},
+ {type:"tf",q:"知覺若不正確，後面的推論與行動也會跟著出錯。",options:["正確","錯誤"],answer:0,explain:"正確。知覺是循環的輸入，輸入錯了後續推論與行動都會偏。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch7",nav:"第7章 讓它照意圖運作",tag:"第 7 章 ★重點",title:"讓 Claude Code 照意圖運作",
+body:`
+<p>這章是<b>解法總集</b>，對應第 6 章三大課題提出三條解決路線。工具很多，但抓住「每個工具解決哪個課題」這條主線就不會亂。</p>
+<h3>7.1 情境工程（解決課題 1：忘記指示）</h3>
+<div class="callout key"><span class="lbl">🔑 什麼是情境工程</span>情境工程＝<b>有策略地管理「放進 AI 情境視窗裡的東西」</b>，讓它在長任務中不忘重點、不被雜訊拖累。三項策略：</div>
+<ol>
+<li><b>壓縮（Compaction）</b>：主動清掉用不到的東西。做法：清除工具結果、依里程碑刪除歷史、<b>壓縮前先把重要資訊外部化</b>（存到檔案）。挑<b>好時機</b>壓縮（任務告一段落），別在關鍵推理到一半時壓。</li>
+<li><b>結構化筆記（Structured Note-Taking）</b>：把任務需求、實作方針、任務清單、卡關紀錄、重要決定，<b>寫成結構化外部筆記</b>。即使情境被壓縮，看筆記就能接回來。</li>
+<li><b>子代理架構（Sub-agent）</b>：把某類工作丟給<b>獨立的子代理</b>，它有<b>自己分離的情境</b>，做完只回報「精簡結論」給主代理，避免大量細節污染主代理情境。</li>
+</ol>
+<div class="callout ex"><span class="lbl">🌰 子代理實例：測試專家</span>定義一個「測試執行與錯誤分析」子代理：被呼叫時跑測試、找出失敗、分析錯誤、回報「成功/失敗數＋失敗清單＋原因＋建議修正」。它把一大堆測試輸出在自己情境裡消化掉，只給主代理一份簡潔報告。</div>
+<h3>7.2 提升指示追從性（解決課題 2：不照意圖）</h3>
+<table>
+<tr><th>機制</th><th>它是什麼</th><th>怎麼被使用</th></tr>
+<tr><td><b>斜線指令</b></td><td>把一套<b>明確流程</b>寫成可重複呼叫的指令</td><td>你<b>明確輸入</b> <code>/指令名</code> 才執行</td></tr>
+<tr><td><b>技能 Skill</b></td><td>教 AI 某類任務的<b>做法與思維</b></td><td>Claude Code <b>自動判斷</b>相關時載入</td></tr>
+<tr><td><b>CLAUDE.md</b></td><td>專案的恆久規則</td><td><b>永遠全文</b>載入情境</td></tr>
+<tr><td><b>鉤子 Hook</b></td><td>用<b>程式規則強制</b>在某時機檢查</td><td>事件觸發時<b>一定</b>執行</td></tr>
+</table>
+<div class="fig">
+<svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <text x="360" y="18" fill="var(--muted)" text-anchor="middle">← 靠 AI 自覺（彈性高）　　確實性　　由程式強制（最可靠）→</text>
+ <line x1="40" y1="35" x2="680" y2="35" stroke="var(--line)" stroke-width="2"/>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="40" y="55" width="150" height="100" rx="10" fill="var(--chip)"/>
+  <text x="115" y="80" fill="var(--accent)" font-weight="bold">斜線指令</text><text x="115" y="105">定義「流程」</text><text x="115" y="128" font-size="11" fill="var(--muted)">你主動 /呼叫</text><text x="115" y="146" font-size="11" fill="var(--muted)">先做A再做B</text>
+  <rect x="205" y="55" width="150" height="100" rx="10" fill="var(--chip)"/>
+  <text x="280" y="80" fill="var(--accent)" font-weight="bold">技能 Skill</text><text x="280" y="105">定義「做法」</text><text x="280" y="128" font-size="11" fill="var(--muted)">AI 自動判斷載入</text><text x="280" y="146" font-size="11" fill="var(--muted)">省情境</text>
+  <rect x="370" y="55" width="150" height="100" rx="10" fill="var(--chip)"/>
+  <text x="445" y="80" fill="var(--accent)" font-weight="bold">CLAUDE.md</text><text x="445" y="105">恆久規則</text><text x="445" y="128" font-size="11" fill="var(--muted)">永遠全文載入</text><text x="445" y="146" font-size="11" fill="var(--muted)">專案北極星</text>
+  <rect x="530" y="55" width="150" height="100" rx="10" fill="var(--panel2)" stroke="var(--ok)" stroke-width="2"/>
+  <text x="605" y="80" fill="var(--ok)" font-weight="bold">鉤子 Hook</text><text x="605" y="105">強制規則</text><text x="605" y="128" font-size="11" fill="var(--muted)">事件觸發必執行</text><text x="605" y="146" font-size="11" fill="var(--muted)">可直接阻擋</text>
+ </g>
+</svg><div class="figcap">圖 8：四種「教 AI 怎麼做」的機制（越往右越可靠）</div></div>
+<div class="callout ex"><span class="lbl">🌰 斜線指令：標準化「新增功能」</span>寫一個 <code>/add-feature</code>：①讀 CLAUDE.md 掌握全貌 ②用 Grep 搜尋類似既有功能、讀實作 ③沿用既有樣式實作 ④跑測試，錯了就修 ⑤更新文件。把專家的「隱性期待」變成白紙黑字。</div>
+<div class="callout ex"><span class="lbl">🌰 鉤子：守門員</span>PreToolUse 鉤子在「工具執行前」檢查，可<b>阻擋</b>不該發生的操作（如禁止編輯某些檔案）。因為是程式判斷，不像提示可能被 AI 忽略，所以最可靠。其他鉤子如 PostToolUse（執行後處理）、Stop（自訂通知）。</div>
+<div class="callout tip"><span class="lbl">📖 技能怎麼建</span>技能核心是一個 <code>SKILL.md</code>（frontmatter 中繼資料＋內容），可附最佳實務與程式碼範例。<b>含程式碼範例能提升 AI 推論效能</b>。技能由 Claude Code 自動判斷使用。</div>
+<h3>7.3 強化與外部系統的連動（解決課題 3）</h3>
+<table>
+<tr><th>方式</th><th>說明</th></tr>
+<tr><td><b>MCP</b></td><td>用標準協定新增工具。適合結構化、反覆使用的連動。</td></tr>
+<tr><td><b>指令式連動</b></td><td>直接活用既有 CLI 工具，或自製 CLI 工具。適合輕量、一次性的事。</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 MCP 與技能是互補的</span><b>MCP 新增「能做的操作」（工具）；技能教「既有工具怎麼用」（做法）。</b>兩者搭配，能力與用法都齊全。</div>
+<h4>安全機制：Sandboxing 與 Dev Container</h4>
+<ul>
+<li><b>Sandboxing（沙箱）</b>：隔離檔案系統與網路，讓「安全的指令免核准執行」，兼顧效率與安全，設有<b>逃生艙（escape hatch）</b>機制。</li>
+<li><b>Dev Container</b>：更完整的環境隔離，適合團隊共享一致環境、做精密網路控制。</li>
+<li><b><code>--dangerously-skip-permissions</code></b>：跳過所有權限確認，如名稱所示「危險」，務必在隔離環境中才用。</li>
+</ul>
+<div class="callout tip"><span class="lbl">⚠️ 資安提醒（呼應公司 ISMS 規範）</span>跳過權限、開放網路雖方便但風險高。處理公司專案時應在隔離環境（Sandbox/Dev Container）內操作，避免機敏資料外流或誤刪重要檔案。</div>
+<div class="callout key"><span class="lbl">🔑 7.4 課題與解法對照</span>課題1 忘記指示 → <b>情境工程</b>（壓縮、結構化筆記、子代理）；課題2 不照意圖 → <b>斜線指令/技能/CLAUDE.md/鉤子</b>；課題3 外部連動 → <b>MCP/指令式連動</b>，並用 Sandboxing/Dev Container 保安全。</div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>7.1 情境工程三策略</h4>
+<table>
+<tr><th>策略</th><th>做法</th><th>效果</th></tr>
+<tr><td>壓縮 Compaction</td><td>把舊記憶摘要、延續新情境</td><td>保連續性、騰出容量</td></tr>
+<tr><td>結構化筆記</td><td>把重要資訊寫到外部檔案持久化</td><td>不受壓縮影響</td></tr>
+<tr><td>子代理</td><td>用獨立情境執行專門任務</td><td>不污染主情境</td></tr>
+</table>
+<div class="callout tip"><span class="lbl">🤝 子代理的正確用法</span>
+有獨立情境、做完回傳<b>簡潔報告</b>（報告驅動）。適合：審查、資訊蒐集、大量資料處理。<b>不適合直接做具體實作</b>——它無法存取親代理情境，易偏離意圖。</div>
+<h4>7.2 提升指示追從性：三個工具</h4>
+<table>
+<tr><th>工具</th><th>教什麼</th><th>確實性</th></tr>
+<tr><td>斜線指令</td><td>明示「工作流程」（做什麼、什麼順序）</td><td>依賴提示</td></tr>
+<tr><td>技能 Skill</td><td>教「工具用法/思維」，自動載入</td><td>依賴提示</td></tr>
+<tr><td>鉤子 Hook</td><td>以程式「強制規則」</td><td>100% 確實</td></tr>
+</table>
+<div class="callout key"><span class="lbl">📚 技能 vs CLAUDE.md（漸進式揭露）</span>
+CLAUDE.md 永遠全文載入；技能只在需要時載入（先 name/description → SKILL.md → 輔助檔），省情境。所以 CLAUDE.md 放「整體方針」，技能放「TypeScript 怎麼寫、資安怎麼審」這類局部知識。</div>
+<p><b>鉤子</b>共 10 種；<code>PreToolUse</code> 可阻擋（回傳結束碼 <b>2</b> ＝禁止該操作），常用還有 PostToolUse（自動格式化）、Notification、Stop（通知）。</p>
+<h4>7.3 外部連動與安全</h4>
+<p><b>MCP 增加「能做什麼」，技能定義「怎麼用」</b>；也可用 Bash 操作既有/自製 CLI。</p>
+<div class="callout tip"><span class="lbl">🔒 Sandboxing 與 Dev Container</span>
+Sandboxing 以 OS 層級隔離（限制目前目錄寫入、限制網路網域），連 prompt injection 也擋。更強的隔離用 <b>Dev Container</b>。<code>--dangerously-skip-permissions</code> 會跳過所有確認、風險高，<b>務必搭配 Dev Container</b> 使用。</div>
+`,quiz:[
+ {type:"mc",q:"「情境工程」的三項策略是？",options:["壓縮、結構化筆記、子代理架構","加密、備份、還原","訓練、測試、部署","新增、刪除、修改"],answer:0,explain:"情境工程三策略：壓縮（Compaction）、結構化筆記、子代理架構。"},
+ {type:"mc",q:"關於「斜線指令」與「技能」的差別，正確的是？",options:["兩者完全一樣","斜線指令需你主動輸入呼叫（定義流程）；技能由 Claude Code 自動判斷在相關時載入（定義做法）","技能要付費","斜線指令只能用一次"],answer:1,explain:"斜線指令＝流程，需明確呼叫；技能＝做法，自動判斷相關性並只在需要時載入，比 CLAUDE.md 省情境。"},
+ {type:"mc",q:"四種指示機制中，哪一種「最確實」，因為用程式強制、不靠 AI 自覺？",options:["CLAUDE.md","斜線指令","鉤子（Hook）","技能"],answer:2,explain:"鉤子在特定時機由程式強制執行（如 PreToolUse 可直接阻擋操作），不依賴 AI 自願遵守，最可靠。"},
+ {type:"tf",q:"MCP 與技能是互補的：MCP 新增「能做的操作」，技能教「既有工具怎麼用」。",options:["正確","錯誤"],answer:0,explain:"正確。MCP 擴充工具（操作），技能定義做法（用法），兩者互補。"},
+ {type:"mc",q:"<code>--dangerously-skip-permissions</code> 該怎麼看待？",options:["平常就該開著比較方便","名稱已標明危險，跳過所有權限確認，應只在隔離環境中使用","它能加速電腦","它會自動防毒"],answer:1,explain:"此選項跳過權限確認、風險高；處理重要或公司專案時應在沙箱/Dev Container 等隔離環境才用。"},
+ {type:"mc",q:"子代理（Sub-agent）能幫助情境工程，主要因為？",options:["它比較便宜","它有「分離的情境」，可消化大量細節後只回報精簡結論，不污染主代理情境","它跑得比較快","它不需要 LLM"],answer:1,explain:"子代理有獨立情境，能把大量中間細節處理掉、只把結論交回主代理，避免主代理情境被塞爆。"},
+ {type:"mc",q:"在「工具執行前」檢查、可直接阻擋操作的鉤子是？",options:["PostToolUse","PreToolUse","Stop","Notification"],answer:1,explain:"PreToolUse 在工具執行前驗證，可阻擋不該發生的操作（如禁止編輯某些檔案）。"},
+ {type:"tf",q:"在 SKILL.md 中放入程式碼範例，有助於提升 AI 的推論效能。",options:["正確","錯誤"],answer:0,explain:"正確。書中 COLUMN 指出含程式碼範例能提升推論效能。"},
+ {type:"mc",q:"CLAUDE.md 與技能在「載入時機」上的差別是？",options:["兩者都永遠載入","CLAUDE.md 永遠全文載入；技能只在需要時載入（較省情境）","技能永遠載入、CLAUDE.md 不載入","兩者都不載入"],answer:1,explain:"CLAUDE.md 永遠全文進情境；技能由 AI 判斷相關時才載入，較節省情境空間。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch8",nav:"第8章 機制化【設計篇】",tag:"第 8 章",title:"把規格驅動開發的流程機制化【設計篇】",
+body:`
+<p>第 4 章「手動」走完一次規格驅動開發。第 8、9 章要把它<b>變成可重複的機制</b>──讓每次開發都自動照同一套高品質流程走。本章是<b>設計篇</b>：規劃這套機制長什麼樣。</p>
+<h3>8.2 機制化的基本設計</h3>
+<p>核心想法：<b>用斜線指令把整個工作流程串起來</b>，每步對應一個指令：</p>
+<table>
+<tr><th>步驟</th><th>對應斜線指令</th><th>做什麼</th></tr>
+<tr><td>1</td><td>建立構想筆記</td><td>記下這次要做什麼的初步想法</td></tr>
+<tr><td>2</td><td>生成永續性文件</td><td>由構想產出 PRD、設計書等</td></tr>
+<tr><td>3</td><td>文件品質審查與修正</td><td>請子代理審查、提出改善</td></tr>
+<tr><td>4</td><td>功能開發</td><td>建引導檔、依任務清單實作</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 三種元件的分工（最重要的整合觀念）</span><b>技能＝定義「做法」</b>（怎麼寫某類文件/程式）；<b>斜線指令＝定義「流程」</b>（先做什麼再做什麼）；<b>子代理＝負責「獨立的驗證／分析」</b>（在分離情境裡審查、驗證）。三者各司其職，組成一條自動化生產線。</div>
+<div class="fig">
+<svg viewBox="0 0 720 220" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <defs><marker id="a8" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+ <rect x="40" y="30" width="640" height="70" rx="10" fill="none" stroke="var(--accent)" stroke-width="2" stroke-dasharray="6"/>
+ <text x="60" y="50" fill="var(--accent)" font-weight="bold" font-size="13">斜線指令 = 流程（生產線）</text>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="70" y="58" width="120" height="32" rx="6" fill="var(--chip)"/><text x="130" y="79">①建構想筆記</text>
+  <rect x="225" y="58" width="120" height="32" rx="6" fill="var(--chip)"/><text x="285" y="79">②生成文件</text>
+  <rect x="380" y="58" width="120" height="32" rx="6" fill="var(--chip)"/><text x="440" y="79">③審查修正</text>
+  <rect x="535" y="58" width="120" height="32" rx="6" fill="var(--chip)"/><text x="595" y="79">④功能開發</text>
+ </g>
+ <g stroke="var(--accent)" stroke-width="2">
+  <line x1="190" y1="74" x2="223" y2="74" marker-end="url(#a8)"/>
+  <line x1="345" y1="74" x2="378" y2="74" marker-end="url(#a8)"/>
+  <line x1="500" y1="74" x2="533" y2="74" marker-end="url(#a8)"/>
+ </g>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="120" y="135" width="200" height="55" rx="10" fill="var(--panel2)" stroke="var(--accent2)"/>
+  <text x="220" y="158" fill="var(--accent2)" font-weight="bold">技能 = 做法</text><text x="220" y="178" font-size="11" fill="var(--muted)">每個工站的作業手冊</text>
+  <rect x="400" y="135" width="200" height="55" rx="10" fill="var(--panel2)" stroke="var(--ok)"/>
+  <text x="500" y="158" fill="var(--ok)" font-weight="bold">子代理 = 驗證</text><text x="500" y="178" font-size="11" fill="var(--muted)">獨立品管站（分離情境）</text>
+ </g>
+ <line x1="285" y1="90" x2="240" y2="133" stroke="var(--accent2)" stroke-width="1.5" stroke-dasharray="4"/>
+ <line x1="440" y1="90" x2="490" y2="133" stroke="var(--ok)" stroke-width="1.5" stroke-dasharray="4"/>
+</svg><div class="figcap">圖 9：三元件分工──斜線指令(流程)×技能(做法)×子代理(驗證) 組成生產線</div></div>
+<div class="callout tip"><span class="lbl">💡 事前準備很關鍵</span>書中強調：<b>開發環境建構對 AI 代理是高難度任務</b>。所以要先用 Dev Container 把環境整備好、用 <code>package.json</code> 定義好指令，確保「提示裡叫它執行的指令一定跑得動」──這是穩定自動運作的要點。</div>
+<h3>8.3 以斜線指令自動化工作流程</h3>
+<ul>
+<li><b><code>/setup-project</code></b>：自動化專案初始設定。讀構想筆記 → 用技能生成文件 → <b>等使用者核准</b> → 核准後自動處理。</li>
+<li><b><code>/review-docs</code></b>：自動化文件審查（用子代理，審查在獨立情境進行，不干擾主流程）。</li>
+<li><b><code>/add-feature</code></b>：自動化功能開發。包含理解專案、計畫階段（自動生成引導檔）、<b>以任務清單為基礎的實作迴圈</b>、驗證與自動測試、文件更新。</li>
+</ul>
+<div class="callout key"><span class="lbl">🔑 設計要點：把提示寫到「讓 Claude Code 不迷惘」</span>例如在 <code>/add-feature</code> 裡明訂「絕不停止、立即進入下一步」「例外處理規則」，讓自動流程不卡在中間等人。<b>如何把提示寫得讓 AI 不猶豫，是機制能否穩定運作的最重要因素。</b></div>
+<h3>8.4 以技能載入特化指示</h3>
+<ul>
+<li><b>文件生成技能</b>：如「建立 PRD 的詳細指南與範本」，只在建 PRD 時用。善用<b>範本＋佔位符</b>，並用<b>斷定式、定量、具體判斷基準</b>的提示寫法。</li>
+<li><b>開發流程技能（steering）</b>：分三模式──①計畫階段建引導檔 ②實作階段監視任務清單 ③驗證階段回顧流程。</li>
+</ul>
+<h3>8.5 以子代理進行情境工程</h3>
+<ul>
+<li><b>doc-reviewer</b>：在獨立情境裡<b>詳細審查文件品質</b>並提改善建議。</li>
+<li><b>implementation-validator</b>：邊參照需求文件、邊<b>驗證實作</b>是否符合規格。</li>
+</ul>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>8.2–8.3 三個斜線指令把流程機制化</h4>
+<table>
+<tr><th>指令</th><th>做什麼</th></tr>
+<tr><td>/setup-project</td><td>從構想筆記生成 6 份永續性文件（第一份要核准）</td></tr>
+<tr><td>/review-docs</td><td>用 doc-reviewer 子代理審查文件</td></tr>
+<tr><td>/add-feature</td><td>從引導檔→實作迴圈→驗證，全自動</td></tr>
+</table>
+<div class="callout tip"><span class="lbl">🧱 先準備好環境</span>
+SetupBench 論文顯示「環境建構對 AI 代理是高難度任務」。長期專案宜由人類事先建好環境。<b>提示叫它跑的指令（如 npm run lint）一定要能成功</b>，否則 Claude Code 會陷入恐慌、動作不穩。</div>
+<p><b>實作迴圈</b>：直到 <code>tasklist.md</code> 全任務變 <code>[x]</code> 才停；並定義<b>例外規則</b>（任務太大就拆、有技術理由可刪），<b>禁止</b>無故跳過或徵詢使用者——這是為無頭模式自動執行而設計。</p>
+<h4>8.4 技能的拆分與提示寫法</h4>
+<p>技能分「成果物單位」（prd-writing 等文件生成）與「任務狀況單位」（steering、development-guidelines）。</p>
+<div class="callout key"><span class="lbl">✍️ 穩定提示三要點</span>
+① <b>斷定式</b>：用「務必」而非「可能的話」。② <b>定量式</b>：給明確數量（如「主要人物誌 1 人、次要 1–2 人」）。③ <b>給具體判斷基準</b>，避免「請適切判斷」。</div>
+<h4>8.5 兩個子代理</h4>
+<p><b>doc-reviewer</b>（5 觀點審文件：完整/明確/一致/可實作/可測量）與 <b>implementation-validator</b>（規格遵循/程式品質/測試/資安/效能），都在獨立情境執行、不污染親代理。</p>
+`,quiz:[
+ {type:"mc",q:"機制化的「三種元件分工」，正確配對是？",options:["技能=流程、斜線指令=做法、子代理=環境","技能=做法、斜線指令=流程、子代理=獨立的驗證/分析","三者都做一樣的事","子代理=做法、技能=驗證"],answer:1,explain:"技能定義做法、斜線指令定義流程、子代理負責獨立的驗證/分析，組成自動化生產線。"},
+ {type:"mc",q:"COLUMN 提醒，對 AI 代理而言哪件事是「高難度任務」，要事先整備？",options:["寫註解","開發環境建構（故先用 Dev Container、定義好指令）","選顏色","命名變數"],answer:1,explain:"開發環境建構對 AI 代理是高難度任務，故須先用 Dev Container 整備、以 package.json 定義指令。"},
+ {type:"tf",q:"本章認為「把提示寫到讓 Claude Code 不迷惘」是機制能否穩定運作的最重要因素之一。",options:["正確","錯誤"],answer:0,explain:"正確。例如明訂「絕不停止、立即進入下一步」與例外處理規則，避免自動流程卡住等人。"},
+ {type:"mc",q:"<code>/add-feature</code> 這類斜線指令在機制中扮演的角色是？",options:["定義單一文件的寫法","定義整條開發「流程」（理解→計畫→實作迴圈→驗證→更新文件）","負責加密","取代人類所有決策"],answer:1,explain:"斜線指令定義流程；/add-feature 串起理解專案、計畫、實作迴圈、驗證測試與文件更新。"},
+ {type:"mc",q:"<code>/review-docs</code> 用子代理來審查文件的好處是？",options:["比較便宜","審查在獨立情境進行，不干擾主流程","可以離線","不需要 LLM"],answer:1,explain:"子代理有分離情境，審查大量文件不會污染主流程的情境。"},
+ {type:"tf",q:"文件生成技能建議用「模糊、抽象」的提示寫法，讓 AI 自由發揮。",options:["正確","錯誤"],answer:1,explain:"錯誤。書中建議用斷定式、定量、具體判斷基準的提示寫法，減少 AI 猶豫與偏差。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"ch9",nav:"第9章 機制化【實踐篇】",tag:"第 9 章",title:"把規格驅動開發的流程機制化【實踐篇】",
+body:`
+<p>設計篇規劃好機制，<b>實踐篇</b>就要真的<b>全自動跑一次</b>──用無頭模式讓 Claude Code 自己從構想做到可動的 MVP，幾乎不用人介入。</p>
+<h3>9.1 以無頭模式完全自動化</h3>
+<div class="callout key"><span class="lbl">🔑 無頭模式 vs REPL 模式</span><b>REPL 模式</b>＝進入互動畫面，一來一往對話。<b>無頭模式（headless）</b>＝<code>claude -p 指示</code>，一行下去、不進對話、直接拿結果，最適合寫進腳本、做自動化。</div>
+<p>無頭模式的指示有多種給法：命令列引數、標準輸入（管線）、或從檔案讀取。常用輸出格式：</p>
+<table>
+<tr><th>輸出格式</th><th>用途</th></tr>
+<tr><td><b>text</b>（預設）</td><td>純文字結果，給人看</td></tr>
+<tr><td><b>json</b></td><td>結構化結果，方便程式解析</td></tr>
+<tr><td><b>stream-json</b></td><td>串流式 JSON，邊產生邊輸出，可即時監看</td></tr>
+</table>
+<div class="callout tip"><span class="lbl">💡 可指定模型</span>無頭模式可用 <code>--model</code> 指定模型。書中說明「為何 MVP 自動開發選 Sonnet 4」──通常是在<b>速度、成本與品質間取平衡</b>：自動跑大量步驟時，反應快又夠聰明最划算。</div>
+<h3>9.2 【實踐】任務管理 App 的自動開發</h3>
+<ol>
+<li><b>準備構想筆記</b>：寫下這次要做的核心想法。</li>
+<li><b>在 REPL 生成文件</b>：先互動式產出永續性文件（PRD、設計書）並確認。</li>
+<li><b>以無頭模式開發 MVP</b>：下一行指令如「請開發 PRD 中的核心機能」，觸發 <code>/add-feature</code> 的自動流程，從建引導檔、依任務清單實作、到自動測試一路跑完。</li>
+<li><b>分析執行日誌</b>：完成後看日誌，了解它每步做了什麼，便於檢查與改進。</li>
+</ol>
+<div class="fig">
+<svg viewBox="0 0 720 140" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <defs><marker id="a9" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="var(--accent)"/></marker></defs>
+ <g text-anchor="middle" fill="var(--txt)">
+  <rect x="20" y="50" width="120" height="45" rx="9" fill="var(--chip)"/><text x="80" y="70">想法/構想</text><text x="80" y="87" font-size="10" fill="var(--muted)">👤 人</text>
+  <rect x="175" y="50" width="120" height="45" rx="9" fill="var(--chip)"/><text x="235" y="70">生成文件</text><text x="235" y="87" font-size="10" fill="var(--muted)">👤 核准</text>
+  <rect x="330" y="50" width="150" height="45" rx="9" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="405" y="70" fill="var(--accent)" font-weight="bold">無頭模式自動實作</text><text x="405" y="87" font-size="10" fill="var(--muted)">🤖 claude -p</text>
+  <rect x="515" y="50" width="90" height="45" rx="9" fill="var(--chip)"/><text x="560" y="73">可動 MVP</text>
+  <rect x="630" y="50" width="80" height="45" rx="9" fill="var(--chip)"/><text x="670" y="70">驗收</text><text x="670" y="87" font-size="10" fill="var(--muted)">👤 人</text>
+ </g>
+ <g stroke="var(--accent)" stroke-width="2">
+  <line x1="140" y1="72" x2="173" y2="72" marker-end="url(#a9)"/>
+  <line x1="295" y1="72" x2="328" y2="72" marker-end="url(#a9)"/>
+  <line x1="480" y1="72" x2="513" y2="72" marker-end="url(#a9)"/>
+  <line x1="605" y1="72" x2="628" y2="72" marker-end="url(#a9)"/>
+ </g>
+ <text x="405" y="120" fill="var(--muted)" font-size="11" text-anchor="middle">人負責頭尾（構想/核准/驗收），中段繁瑣實作全自動</text>
+</svg><div class="figcap">圖 10：無頭模式自動化──從想法到可動軟體的生產線</div></div>
+<div class="callout ex"><span class="lbl">🌰 這代表什麼</span>你等於擁有一條「給它想法 → 自動產出可動軟體」的生產線。人主要負責前段構想與核准、後段驗收，中間繁瑣實作交給機制。這就是全書想帶你抵達的境界。</div>
+<h3>9.3 如何更進一步發展</h3>
+<table>
+<tr><th>元件</th><th>角色</th><th>怎麼擴充</th></tr>
+<tr><td><b>技能</b></td><td>定義「做法」</td><td>依成果物單位、任務單位、領域單位增加新技能</td></tr>
+<tr><td><b>斜線指令</b></td><td>定義「流程」</td><td>把新定型作業指令化、把既有指令再專門化、調整核准流程</td></tr>
+<tr><td><b>子代理</b></td><td>獨立驗證/分析</td><td>用於讀大量檔案、專門驗證，並設計好回傳結果的方式</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🔑 全書總結</span>用<b>無頭模式</b>把機制串起來，達成「構想 → 自動產出 MVP」。三元件（技能=做法、斜線指令=流程、子代理=驗證）可隨需求持續擴充。回到全書心法：<b>動手做（從小開始）、從失敗學習、留下紀錄。</b></div>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>9.1 無頭模式（headless）</h4>
+<p>＝不對話、以程式方式執行（<code>-p</code>/<code>--print</code>），適合 CI/CD、批次、腳本自動化。輸出格式：</p>
+<table>
+<tr><th>格式</th><th>用途</th></tr>
+<tr><td>text（預設）</td><td>純文字結果</td></tr>
+<tr><td>json</td><td>含成本/時間/token 統計</td></tr>
+<tr><td>stream-json（需 --verbose）</td><td>即時串流，便於事後分析軌跡</td></tr>
+</table>
+<p>自動開發 MVP 的指令（<code>prompt.md</code> 只放一行 <code>/add-feature …</code>）：</p>
+<pre><code>cat prompt.md | claude -p --dangerously-skip-permissions \
+  --output-format stream-json --verbose \
+  --model claude-sonnet-4-20250514 2>&1 | tee output.jsonl</code></pre>
+<div class="callout tip"><span class="lbl">⚠️ 兩個關鍵</span>
+① 因 <code>--dangerously-skip-permissions</code> 放行所有工具，<b>務必在 Dev Container 執行</b>。② 本章刻意選 <b>Sonnet 4</b>（非 4.5）——無頭下它較少中途徵詢、較能一路跑到底。</div>
+<h4>9.2 實踐：自動開發任務管理 App</h4>
+<p>流程：REPL 互動生成 6 份文件並核准 → <code>/review-docs</code> 審查修正 → 無頭模式跑 <code>/add-feature</code> 自動實作出 <code>task</code> CLI。<b>日誌分析</b>：無頭日誌可達數百 KB、難目視，可用 LLM（如 Gemini 2.5 Pro / Google AI Studio）分析行動軌跡、找問題、修正提示。</p>
+<h4>9.3 如何更進一步發展</h4>
+<p>技能依「成果物/任務/領域」單位擴充；斜線指令把新定型作業指令化、或派生專門版、調整核准點；子代理特化於大量讀檔與專門驗證。</p>
+<div class="callout key"><span class="lbl">🧭 最終心法</span>
+工具更新太快、無法全跟上。<b>把 Claude Code 理解為 AI 代理、學會切分問題、依意圖活用功能</b>，才是能遷移到任何代理的核心能力。</div>
+`,quiz:[
+ {type:"mc",q:"「無頭模式（headless）」最適合的用途是？",options:["跟 AI 閒聊","寫進腳本、做自動化（一行指令直接拿結果）","只用來看圖","關閉 AI"],answer:1,explain:"無頭模式 claude -p 指示 不進對話畫面、直接輸出結果，最適合腳本化與全自動流程。"},
+ {type:"mc",q:"無頭模式三種輸出格式中，哪一種最方便「程式解析」？",options:["text","json","手寫","語音"],answer:1,explain:"json 是結構化輸出，方便程式解析；text 給人看，stream-json 可即時串流監看。"},
+ {type:"tf",q:"實踐篇的最終境界是「給它想法 → 自動產出可動軟體」，人負責構想、核准與驗收。",options:["正確","錯誤"],answer:0,explain:"正確。機制讓中段繁瑣實作自動化，人聚焦在前段構想/核准與後段驗收。"},
+ {type:"mc",q:"為何 MVP 自動開發傾向選用像 Sonnet 4 這類模型？",options:["因為最貴","在速度、成本與品質間取平衡──自動跑大量步驟時最划算","因為它不會出錯","隨便選的"],answer:1,explain:"自動化需跑很多步驟，選速度快、成本合理又夠聰明的模型最有效率。"},
+ {type:"mc",q:"無頭模式下指示的方式不包含？",options:["命令列引數","標準輸入（管線）","從檔案讀取","用滑鼠手寫"],answer:3,explain:"無頭模式可用命令列引數、標準輸入（管線）、從檔案讀取來給指示。"},
+ {type:"tf",q:"擴充機制時，把「新的定型作業指令化」屬於擴充斜線指令的做法。",options:["正確","錯誤"],answer:0,explain:"正確。斜線指令定義流程，擴充方式包含把新定型作業指令化、把既有指令再專門化等。"}
+]
+});
+</script>
+<script>
+DATA.push({
+id:"appendix",nav:"附錄 設定/公司/法務",tag:"附錄",title:"附錄：服務設定、Anthropic 概要與法務規約",
+body:`
+<p>附錄整理了實作會用到的設定步驟，以及使用 Claude Code 時該知道的<b>合規與法務</b>觀念。對在公司環境使用的人特別重要。</p>
+<h3>A. 設定步驟</h3>
+<ul>
+<li><b>A.1 在 Amazon Bedrock 上使用 Claude Code</b>：透過 AWS 的 Bedrock 呼叫 Claude API 的設定流程，適合已用 AWS 的企業。</li>
+<li><b>A.2 GitHub CLI 的驗證</b>：設定 <code>gh</code> 時會被問幾個問題──用 GitHub.com 還是其他、Git 操作協定（HTTPS/SSH）、是否用 GitHub 憑證驗證 Git、如何驗證 GitHub CLI。照提示選即可。</li>
+</ul>
+<h3>B. Anthropic 公司與法務</h3>
+<h4>Claude 模型家族（書中時點）</h4>
+<table>
+<tr><th>模型</th><th>定位</th></tr>
+<tr><td>Claude Opus 4.5</td><td>能力最強，適合最難的任務</td></tr>
+<tr><td>Claude Sonnet 4.5</td><td>速度與能力平衡，常用於自動化</td></tr>
+<tr><td>Claude Haiku 4.5</td><td>最輕快，適合大量、簡單的任務</td></tr>
+</table>
+<h4>合規作為（第三方認證）</h4>
+<ul>
+<li><b>SOC 2 Type II</b>：資安控管的稽核認證</li>
+<li><b>ISO/IEC 27001:2022</b>：資訊安全管理系統國際標準</li>
+<li><b>GDPR</b>：歐盟一般資料保護規則遵循</li>
+<li><b>HIPAA</b>：美國醫療資訊保護對應</li>
+</ul>
+<h4>法務重點（務必注意）</h4>
+<div class="callout key"><span class="lbl">🔑 方案影響你的資料怎麼被處理</span>不同方案適用不同規約。<b>企業要妥善履行資料管理責任，建議選 Claude for Work（Team 或 Enterprise）方案。</b>在某些設定下，輸入的提示（業務邏輯、需求、設計思想）<b>可能被納入訓練資料</b>，企業機密外洩的風險需特別注意。</div>
+<div class="callout key"><span class="lbl">🔑 生成程式碼的著作權與 IP 補償</span>書中說明生成程式碼的著作權歸屬，以及<b>智慧財產補償（IP Indemnity）</b>──但<b>此補償不適用於消費者方案</b>。企業用途要選對方案才有保障。</div>
+<div class="callout tip"><span class="lbl">⚠️ 呼應公司 ISMS 規範</span>在公司環境使用 AI 工具時：①不要把未去識別化的客戶資料、機密文件丟給 AI ②留意所用方案的資料訓練政策 ③生成的程式與內容<b>須經人工審查驗證</b>後才採用。</div>
+<div class="callout key"><span class="lbl">🔑 本書到此結束</span>你已走完《實踐 Claude Code 入門》的全貌：從認識程式設計代理、操作、MCP、規格驅動開發、自動化，到理解原理、讓它照意圖運作、把流程機制化。接下來最重要的事只有一件──<b>打開終端機，動手做、從小開始。</b> 🚀</div>
+<p style="color:var(--muted);font-size:13px;margin-top:24px">※ 本學習頁內容由 AI 輔助生成，依原書目錄改寫整理，供個人學習參考；實際操作與法務細節請以官方文件與原書為準，並經專業判斷後採用。</p>
+
+<h3>📖 完整內容（逐節詳解）</h3>
+<h4>A.1 在 Amazon Bedrock 上使用</h4>
+<pre><code>export AWS_ACCESS_KEY_ID=...   # AWS 金鑰
+export AWS_SECRET_ACCESS_KEY=...
+export CLAUDE_CODE_USE_BEDROCK=1
+export AWS_REGION=ap-northeast-1
+export ANTHROPIC_MODEL='jp.anthropic.claude-sonnet-4-5-20250929-v1:0'</code></pre>
+<p>以 <code>/status</code> 確認 API provider 顯示 AWS Bedrock。</p>
+<h4>A.2 GitHub CLI 驗證</h4>
+<p><code>gh auth login</code> → 選 GitHub.com → HTTPS → 用瀏覽器登入並輸入一次性代碼。</p>
+<h4>B.1 Anthropic 概要、合規與法務</h4>
+<p>Anthropic 是 <b>PBC（公益法人）</b>，2021 年創立，使命含「為人類長期利益負責任地開發先進 AI」；在企業 LLM API（32%）與開發者程式碼生成（42%）市佔居首。合規取得 <b>SOC 2 Type II、ISO/IEC 27001:2022</b>，遵循 GDPR、對應 HIPAA（需簽 BAA）。</p>
+<table>
+<tr><th>規約</th><th>消費者(Free/Pro/Max)</th><th>Work(Team/Enterprise)</th><th>API</th></tr>
+<tr><td>Usage Policy</td><td>✅</td><td>✅</td><td>✅</td></tr>
+<tr><td>Consumer Terms</td><td>✅</td><td>—</td><td>—</td></tr>
+<tr><td>Commercial Terms</td><td>—</td><td>✅</td><td>✅</td></tr>
+</table>
+<div class="callout key"><span class="lbl">🏢 資料管理與著作權重點</span>
+消費者方案：Anthropic 為資料控管者；Team/Enterprise：企業為控管者、Anthropic 為處理者（適用 DPA）——<b>業務使用建議選 Team/Enterprise</b>。消費者方案的「協助改善 Claude」可開關，開啟時業務程式碼/提示可能被用於訓練。<b>生成程式碼著作權在適用法範圍內歸使用者</b>；IP 智財補償<b>僅商用方案</b>適用，且責任額可能受限於過去 12 個月實付費用。</div>
+<div class="callout tip"><span class="lbl">📌 重要</span>以上為 2025 年 11 月時點資訊，規約可能變更，正式導入務必看官方最新文件並諮詢法務/律師。</div>
+`,quiz:[
+ {type:"mc",q:"企業要妥善履行資料管理責任時，較適合選哪種方案？",options:["免費方案","消費者個人方案","Claude for Work（Team 或 Enterprise）","完全不要用"],answer:2,explain:"企業用途建議選 Claude for Work（Team/Enterprise），在資料控管與規約上較有保障。"},
+ {type:"tf",q:"「智慧財產補償（IP Indemnity）」同樣適用於消費者方案。",options:["正確","錯誤"],answer:1,explain:"錯誤。書中明確指出 IP 補償不適用於消費者方案，這也是企業要選對方案的原因之一。"},
+ {type:"mc",q:"下列哪一項「不是」書中列出的 Anthropic 合規認證？",options:["SOC 2 Type II","ISO/IEC 27001:2022","GDPR 遵循","ISO 9001 汽車品質認證"],answer:3,explain:"書中列出的是 SOC 2 Type II、ISO/IEC 27001、GDPR、HIPAA；未提及 ISO 9001 汽車品質認證。"},
+ {type:"mc",q:"在公司環境使用 AI 工具時，最不恰當的做法是？",options:["把未去識別化的客戶機密直接貼給 AI 處理","留意所用方案的資料訓練政策","生成內容經人工審查後才採用","選擇有企業級資料保障的方案"],answer:0,explain:"把未去識別化的客戶機密直接交給 AI 可能造成資料外洩，違反資安規範，應避免。"},
+ {type:"mc",q:"模型家族中，最適合「大量、簡單任務」的輕快模型是？",options:["Opus","Sonnet","Haiku","沒有這種"],answer:2,explain:"Haiku 最輕快，適合大量、簡單的任務；Opus 最強、Sonnet 平衡。"}
+]
+});
+</script>
+<!-- ====== 引擎 ====== -->
+<script>
+const LS='claudecode_learn_single_v1';
+let state=JSON.parse(localStorage.getItem(LS)||'{"read":{},"scores":{}}');
+function save(){localStorage.setItem(LS,JSON.stringify(state))}
+const nav=document.getElementById('nav'),main=document.getElementById('main');
+function buildNav(){
+  nav.innerHTML='';
+  DATA.forEach((ch,i)=>{
+    const d=document.createElement('div');
+    d.className='nav-item'+(state.read[ch.id]?' read':'');
+    const sc=state.scores[ch.id];
+    d.innerHTML='<span class="dot"></span><span>'+ch.nav+'</span>'+
+      (sc!=null?'<span class="score">'+sc.got+'/'+sc.total+'</span>':(ch.quiz&&ch.quiz.length?'<span class="score">測驗</span>':''));
+    d.onclick=()=>show(i);
+    nav.appendChild(d);
+  });
+  updateProgress();
+}
+function updateProgress(){
+  const tot=DATA.length,done=DATA.filter(c=>state.read[c.id]).length,pct=Math.round(done/tot*100);
+  document.getElementById('pfill').style.width=pct+'%';
+  document.getElementById('plabel').textContent='學習進度 '+pct+'%（已讀 '+done+'/'+tot+' 章）';
+}
+function navActive(i){[...nav.children].forEach((n,k)=>n.classList.toggle('active',k==i))}
+function show(i){
+  const ch=DATA[i];navActive(i);
+  let html='<div class="chapter show"><span class="ch-tag">'+ch.tag+'</span><h2 class="ch-title">'+ch.title+'</h2>'+ch.body;
+  html+='<button class="mark-read '+(state.read[ch.id]?'done':'')+'" id="mrBtn">'+(state.read[ch.id]?'✓ 已標記讀完':'標記本章讀完')+'</button>';
+  if(ch.quiz&&ch.quiz.length)html+=renderQuiz(ch);
+  html+='</div>';
+  main.innerHTML=html;window.scrollTo(0,0);
+  document.getElementById('mrBtn').onclick=function(){
+    state.read[ch.id]=!state.read[ch.id];save();
+    this.classList.toggle('done',state.read[ch.id]);
+    this.textContent=state.read[ch.id]?'✓ 已標記讀完':'標記本章讀完';
+    document.querySelectorAll('#nav .nav-item')[i].classList.toggle('read',state.read[ch.id]);
+    updateProgress();
+  };
+  bindQuiz(ch);
+}
+function renderQuiz(ch){
+  let h='<div class="quiz"><h3>📝 本章測驗（'+ch.quiz.length+' 題）</h3>';
+  ch.quiz.forEach((q,qi)=>{
+    h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span>'+
+       '<div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+    q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+o+'</label>';});
+    h+='<div class="explain"><span class="r"></span><div class="etext">'+q.explain+'</div></div></div>';
+  });
+  h+='<div class="quiz-score" id="qscore"></div></div>';
+  return h;
+}
+function bindQuiz(ch){
+  if(!ch.quiz||!ch.quiz.length)return;
+  const answered={};
+  main.querySelectorAll('.q').forEach(qel=>{
+    const qi=+qel.dataset.qi,q=ch.quiz[qi];
+    qel.querySelectorAll('.opt').forEach(opt=>{
+      opt.onclick=()=>{
+        if(answered[qi]!=null)return;
+        const oi=+opt.dataset.oi;answered[qi]=oi;
+        const exp=qel.querySelector('.explain'),r=qel.querySelector('.r');
+        qel.querySelectorAll('.opt').forEach((o,k)=>{
+          o.classList.add('disabled');
+          if(k===q.answer)o.classList.add('correct');
+          if(k===oi&&oi!==q.answer)o.classList.add('wrong');
+        });
+        if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok';}
+        else{r.textContent='✗ 答錯了。正確答案：'+q.options[q.answer];r.className='r bad';}
+        exp.classList.add('show');
+        if(Object.keys(answered).length===ch.quiz.length)finishQuiz(ch,answered);
+      };
+    });
+  });
+}
+function finishQuiz(ch,answered){
+  let got=0;ch.quiz.forEach((q,qi)=>{if(answered[qi]===q.answer)got++;});
+  const total=ch.quiz.length;state.scores[ch.id]={got,total};save();
+  const el=document.getElementById('qscore');
+  let msg=got===total?'🎉 全對！觀念非常清楚！':got>=total*0.6?'👍 不錯，再複習標錯的觀念。':'💪 別氣餒，回頭看一次重點再來挑戰。';
+  el.innerHTML='本章得分：<b>'+got+' / '+total+'</b>　'+msg;
+  el.classList.add('show');
+  buildNav();navActive(DATA.indexOf(ch));
+}
+function stripTags(h){return h.replace(/<[^>]+>/g,' ')}
+document.getElementById('search').oninput=function(){
+  const kw=this.value.trim(),box=document.getElementById('searchResults');
+  if(!kw){box.innerHTML='';return;}
+  const res=[];
+  DATA.forEach((ch,i)=>{
+    const text=stripTags(ch.title+' '+ch.body),idx=text.toLowerCase().indexOf(kw.toLowerCase());
+    if(idx>=0){
+      const s=Math.max(0,idx-15),snip=text.slice(s,idx+kw.length+25);
+      const hl=snip.replace(new RegExp('('+kw.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig'),'<mark>$1</mark>');
+      res.push('<div class="sr" onclick="show('+i+')">'+ch.nav+'：…'+hl+'…</div>');
+    }
+  });
+  box.innerHTML=res.length?res.join(''):'<div style="color:var(--muted);padding:6px">找不到「'+kw+'」</div>';
+};
+document.getElementById('resetBtn').onclick=function(){
+  if(confirm('確定要清除所有已讀紀錄與測驗分數嗎？')){state={read:{},scores:{}};save();buildNav();show(0);}
+};
+buildNav();show(0);
+</script>
+</body>
+</html>

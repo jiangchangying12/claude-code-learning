@@ -1,0 +1,308 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>第6章 理解 Claude Code 的運作原理 · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:230px;flex:0 0 230px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》第 6 章 · 最完整版</h1><div class=sub>理解運作原理 ｜ 主動回想：讀完每節點「已讀」、最後做測驗</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">第 6 章 · 第 2 部開篇</div>
+<h2 class="ch-title">理解 Claude Code 的運作原理</h2>
+<p class="lead">作者：西見公宏。到目前為止，我們學了 Claude Code 的基本用法與實務活用。光憑這些就足以使用，但若要讓它<b>更照你的意圖運作</b>，關鍵在於——把 Claude Code 理解成一個「AI 代理」。本章拆解它內部的運作原理，讓你日後遇到問題時，能準確判斷「是哪個環節出了狀況、該用哪個功能解決」。</p>
+<div class="callout key"><span class="lbl">🎯 本章兩大主軸</span>
+① 把 Claude Code 理解為由「環境・知覺・記憶・推論・行動」五要素構成的 AI 代理。<br>
+② 認識實務活用時的三大課題，並理解它們各自對應哪個要素（這是第 7 章解法的鋪陳）。</div>
+
+<h3>6.1　把 Claude Code 理解為 AI 代理</h3>
+<p>回顧第 4 章，我們靠整備 <code>CLAUDE.md</code> 與文件群，讓 Claude Code 做出一致的開發。當時它的典型動作是這樣的：</p>
+<div class="fig"><div class="figbox-list">
+<b>使用者：</b>「請新增優先度篩選功能。」<br>
+<b>Claude Code 依序：</b>① 讀 CLAUDE.md 確認專案規則 → ② 讀 product-requirements.md 理解需求 → ③ 讀 architecture.md 掌握實作方針 → ④ 搜尋既有元件確認樣式 → ⑤ 在 .steering/ 建計畫文件 → ⑥ 開始實作 → ⑦ 執行測試 → ⑧ 出錯則修正 → ⑨ 重新測試 → ⑩ 更新文件。
+</div><div class="figcap">圖 6.1　第 4 章中典型的 Claude Code 動作</div></div>
+<p>它能這樣自主運作，是因為它被實作為一個 <b>AI 代理</b>。</p>
+
+<h4>AI 代理的機制：五個要素</h4>
+<p>如第 1 章所述，AI 代理是「針對指定目標、自主行動以達成」的系統，目標是完成人類的知識型任務。它由五個要素構成，協同運作：</p>
+<div class="fig">
+<svg viewBox="0 0 760 200" xmlns="http://www.w3.org/2000/svg" font-size="13">
+ <rect x="20" y="80" width="120" height="44" rx="8" fill="var(--chip)" stroke="var(--muted)"/><text x="80" y="107" fill="var(--txt)" text-anchor="middle">環境</text>
+ <rect x="190" y="80" width="120" height="44" rx="8" fill="var(--chip)" stroke="var(--accent2)"/><text x="250" y="107" fill="var(--accent2)" text-anchor="middle">知覺</text>
+ <rect x="360" y="60" width="150" height="84" rx="10" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="435" y="95" fill="var(--accent)" text-anchor="middle" font-weight="bold">推論（LLM）</text><text x="435" y="118" fill="var(--muted)" text-anchor="middle" font-size="11">＋記憶／計畫</text>
+ <rect x="560" y="80" width="120" height="44" rx="8" fill="var(--chip)" stroke="var(--accent2)"/><text x="620" y="107" fill="var(--accent2)" text-anchor="middle">行動</text>
+ <g fill="var(--muted)" font-size="18">
+  <text x="162" y="107">→</text><text x="332" y="107">→</text><text x="532" y="107">→</text>
+ </g>
+ <path d="M620 128 q0 50 -270 50 q-270 0 -270 -50" fill="none" stroke="var(--muted)" stroke-dasharray="4 4"/>
+ <text x="350" y="192" fill="var(--muted)" text-anchor="middle" font-size="11">行動改變環境 → 產生新的知覺 → 再推論……（不斷循環）</text>
+</svg>
+<div class="figcap">圖 6.2　AI 代理的動作流程</div></div>
+
+<h4>① 環境：AI 代理作用的場所</h4>
+<p>環境是代理「取得資訊、並透過行動施加變化」的對象。不同種類的代理，環境也不同：</p>
+<table>
+<tr><th>種類</th><th>環境</th><th>知覺</th><th>行動</th></tr>
+<tr><td>自動駕駛車</td><td>道路、號誌、行人</td><td>攝影機、雷達、GPS</td><td>方向盤、油門、煞車</td></tr>
+<tr><td>工廠機器人</td><td>生產線、零件</td><td>攝影機、位置感測器</td><td>手臂移動、夾取、組裝</td></tr>
+<tr><td>Web 導覽代理</td><td>網頁、表單、連結</td><td>HTML 結構、文字</td><td>點擊、輸入、捲動</td></tr>
+<tr><td><b>程式設計代理</b></td><td><b>原始碼、設定檔、文件</b></td><td><b>檔案內容、指令結果</b></td><td><b>編輯檔案、執行指令</b></td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 6.1　不同種類 AI 代理的對象環境差異</div>
+<p>對 Claude Code 而言，環境＝參照專案程式碼庫的<b>檔案系統</b>＋程式碼的<b>執行環境</b>。它透過檔案系統讀專案的程式碼（如 <code>src/components/TaskList.tsx</code>、<code>docs/architecture.md</code>），並執行 <code>npm</code>、<code>git</code> 等指令與執行環境溝通（命令列、經指令存取資料庫/外部 API）。</p>
+<div class="fig"><div class="figbox-list">
+<b>情境1 建立檔案：</b>行動 <code>Write('src/Profile.tsx', code)</code> → 環境：建立新檔 → 知覺：確認 Profile.tsx 已建立。<br>
+<b>情境2 執行測試：</b>行動 <code>Bash('npm test')</code> → 環境：執行測試 → 知覺：成功「✓ All 15 tests passed」／失敗「✗ 2 tests failed…」。<br>
+<b>情境3 編輯程式碼：</b>行動 <code>Edit('src/api.ts', 25, newCode)</code> → 環境：第 25 行被改 → 知覺：確認變更已套用。
+</div><div class="figcap">圖 6.3 / 6.4　Claude Code 對象的環境與互動（「行動→環境反應→知覺」是基本動作模式）</div></div>
+
+<h4>② 知覺：從環境接收資訊</h4>
+<p>知覺＝從環境或使用者取得資訊的過程，相當於人類的五感。Claude Code 的知覺<b>主要以「工具的執行結果」取得</b>：</p>
+<div class="fig"><div class="figbox-list">
+・檔案系統：<code>Read('src/App.tsx')</code> → 知覺到該檔內容。<br>
+・命令列：<code>Bash('npm test')</code> → 知覺到 PASS/FAIL 與錯誤詳情。<br>
+・Web API：<code>WebSearch('React 19 新功能')</code> → 知覺到搜尋結果。<br>
+・使用者輸入：知覺到「請新增個人檔案編輯功能，並依既有樣式實作」這類指示。
+</div><div class="figcap">圖 6.5　知覺的種類與具體例</div></div>
+<div class="callout tip"><span class="lbl">⚠️ 為什麼知覺很關鍵</span>知覺得到的資訊會在下一步推論被分析、成為行動依據。<b>若知覺不正確，推論與行動也會跟著出錯。</b></div>
+
+<h4>③ 記憶：保留過去的經驗與知識</h4>
+<p>沒有記憶，代理每次都得從零重想。記憶依保留期間分兩類：</p>
+<table>
+<tr><th>類型</th><th>是什麼</th><th>特性</th></tr>
+<tr><td>短期記憶</td><td><b>情境視窗（context window）</b></td><td>容量有限；長對話會導致「忘記」過去指示</td></tr>
+<tr><td>長期記憶</td><td>外部檔案 / 資料庫</td><td>容量實質無限；需要時才載入短期記憶</td></tr>
+</table>
+<div class="figcap" style="text-align:left">圖 6.6　記憶的分類</div>
+<p>Claude Code 的短期記憶＝情境視窗，指「LLM 生成新文字時可參照的文字總量 ＋ 所生成的全部新文字」。載入 CLAUDE.md、Read 檔案、WebFetch、保留 Bash 結果……至今所有動作都會消耗它。</p>
+<div class="callout key"><span class="lbl">🧠 帶出「情境工程」</span>使用者「它記得我之前說的話」這種體驗，取決於「能多好地管理情境視窗內的記憶」。這種管理就叫<b>情境工程（Context Engineering）</b>——正是第 7 章的主題。</div>
+
+<h4>④ 推論：決定下一步行動</h4>
+<p>推論＝依「知覺到的資訊 ＋ 記憶」判斷下一步該做什麼，是代理的「思考」、智能核心。由 LLM（Claude）執行：</p>
+<div class="fig"><div class="figbox-list">
+<b>LLM 推論的輸入（提示）：</b>系統提示 ＋ 使用者指示「新增個人檔案編輯功能」＋ CLAUDE.md（「務必確認 README.md 與 architecture.md」）＋ 會話歷史 ＋ 工具執行歷史。<br>
+<b>輸出：</b>選擇工具 <code>Read</code>、參數 <code>{ path: "README.md" }</code>，推論結果「為理解整個專案，先讀 README.md」。
+</div><div class="figcap">圖 6.7　LLM 的推論</div></div>
+<p>LLM 綜合提示中所有資訊，決定下一個工具與參數。<b>推論品質決定代理的智能。</b> Claude Code 可選 Opus／Sonnet／Haiku：複雜、需長步驟的任務用 Opus，其餘用 Sonnet 或 Haiku。</p>
+<div class="callout ex"><span class="lbl">🧪 MEMO：想推論更深就用 ultrathink</span>
+Claude Code 內建「擴展思考模式」，在提示放入關鍵字即可啟用，提高思考預算（內部約略消耗的 token）：</div>
+<table>
+<tr><th>關鍵字</th><th>思考預算（約）</th><th>說明</th></tr>
+<tr><td>think</td><td>約 4,000 token</td><td>輕度推論</td></tr>
+<tr><td>think hard / megathink</td><td>約 10,000 token</td><td>更深入的分析</td></tr>
+<tr><td>think harder / ultrathink</td><td>約 31,999 token</td><td>非常詳盡，最適合長時間/複雜任務</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 6.2　指示關鍵字對應的思考預算</div>
+
+<h4>⑤ 行動：對環境施加作用</h4>
+<p>在 Claude Code 中，<b>所有行動都是「工具的執行」</b>。為達成程式設計任務所需的眾多工具已標準內建：</p>
+<table>
+<tr><th>類別</th><th>工具</th></tr>
+<tr><td>檔案操作</td><td>Read、Write、Edit、MultiEdit</td></tr>
+<tr><td>搜尋</td><td>Grep、Glob</td></tr>
+<tr><td>Web 存取</td><td>WebSearch、WebFetch</td></tr>
+<tr><td>Notebook</td><td>NotebookRead、NotebookEdit</td></tr>
+<tr><td>指令執行</td><td>Bash、SlashCommand</td></tr>
+<tr><td>任務管理</td><td>Task（子代理）、TodoWrite</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 6.3　Claude Code 可用工具一覽</div>
+<p>行動的執行結果會再被當作知覺納入、用於下一次推論。反覆此循環，便能分階段達成複雜任務：</p>
+<div class="fig">
+<svg viewBox="0 0 620 150" xmlns="http://www.w3.org/2000/svg" font-size="12.5">
+ <rect x="20" y="55" width="150" height="44" rx="8" fill="var(--chip)" stroke="var(--accent2)"/><text x="95" y="76" fill="var(--accent2)" text-anchor="middle">行動</text><text x="95" y="92" fill="var(--muted)" text-anchor="middle" font-size="10">執行工具</text>
+ <rect x="235" y="55" width="150" height="44" rx="8" fill="var(--chip)" stroke="var(--muted)"/><text x="310" y="76" fill="var(--txt)" text-anchor="middle">知覺</text><text x="310" y="92" fill="var(--muted)" text-anchor="middle" font-size="10">執行結果</text>
+ <rect x="450" y="50" width="150" height="54" rx="10" fill="var(--panel2)" stroke="var(--accent)" stroke-width="2"/><text x="525" y="80" fill="var(--accent)" text-anchor="middle" font-weight="bold">推論</text>
+ <g fill="var(--muted)" font-size="18"><text x="192" y="82">→</text><text x="407" y="82">→</text></g>
+ <path d="M525 104 q0 36 -215 36 q-215 0 -215 -36" fill="none" stroke="var(--accent)" stroke-dasharray="4 4"/>
+ <text x="310" y="138" fill="var(--accent)" text-anchor="middle" font-size="11">↻ 例：測試失敗→讀程式碼→修正→重測→成功→更新文件</text>
+</svg>
+<div class="figcap">圖 6.8 / 6.9　行動→知覺→推論的回饋迴圈：Claude Code 就是「不斷選擇工具」的 AI 代理</div></div>
+
+<h3>6.2　活用程式設計代理時的三大課題</h3>
+<p>五要素協同讓 Claude Code 自主執行複雜任務。但實際活用時會碰到「動作與意圖不同」的課題，而它們與五要素密切相關：</p>
+<table>
+<tr><th>課題</th><th>對應要素</th><th>原因</th></tr>
+<tr><td>1. 忘記過去的指示</td><td>記憶</td><td>情境視窗容量限制</td></tr>
+<tr><td>2. 不照意圖運作</td><td>推論</td><td>隱性期待未明示、資料間衝突</td></tr>
+<tr><td>3. 無法妥善連動外部系統</td><td>行動</td><td>預設工具種類不足、MCP 未必選對</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 6.4　課題與 AI 代理要素的對應關係</div>
+
+<h4>課題 1：忘記過去的指示</h4>
+<p>一開始 Claude Code 能正確理解 architecture.md、做出一致判斷；但任務一長、工具執行一多，就會發生：</p>
+<div class="fig"><div class="figbox-list">
+<b>開始（步驟 1–20）：</b>「依 architecture.md，按 UI 層→服務層→資料層實作。」<br>
+<b>中盤（步驟 50–70）：</b>「正在實作個人檔案編輯，接著寫測試。」→ 還記得設計判斷。<br>
+<b>後半（步驟 100+）：</b>「我來修錯。建立<u>直接存取資料層</u>的元件。」→ 用了 architecture.md <b>禁止</b>的樣式！<br>
+<b>使用者：</b>那是被禁止的樣式。<b>Claude Code：</b>抱歉，我確認 architecture.md……→ 明明一開始讀過卻忘了。
+</div><div class="figcap">圖 6.10　長時間任務中設計判斷的喪失</div></div>
+<p>這不是單純的故障，而是源於記憶機制的<b>結構性問題</b>。長任務中三項因素連鎖作用：</p>
+
+<p><b>(1) 每次工具執行都消耗記憶。</b>Claude Code 是「不斷選工具的代理」，任務越進行、情境越龐大：</p>
+<table>
+<tr><th>步驟</th><th>操作</th><th>讀入 token</th><th>累計</th></tr>
+<tr><td>1</td><td>Read('CLAUDE.md')</td><td>約 1,000</td><td>1,000</td></tr>
+<tr><td>3</td><td>Read('architecture.md') ← 重要規則</td><td>約 1,500</td><td>4,500</td></tr>
+<tr><td>50</td><td>Bash('npm test') ← 大量日誌</td><td>約 15,000</td><td>約 50,000</td></tr>
+<tr><td>100</td><td>（累計）</td><td>—</td><td>約 120,000</td></tr>
+</table>
+<div class="figcap" style="text-align:left">圖 6.11　工具執行造成的情境消耗（步驟 3 讀的 architecture.md 細節，後期很可能已被壓縮或丟棄）</div>
+<p>尤其 <code>Bash</code> 跑測試/建置會輸出大量日誌（含堆疊追蹤），一次就吃掉數千～數萬 token。</p>
+
+<p><b>(2) 情境視窗的自動壓縮（auto-compaction）。</b>當情境達門檻（預設約 <b>95%</b>），Claude Code 自動執行壓縮，把會話與工具歷史摘要化：</p>
+<div class="fig"><div class="figbox-list">
+<b>壓縮前：</b>系統提示＋CLAUDE.md＋全部會話歷史＋全部工具執行歷史（含 architecture.md 的 1,500 token 細節、npm test 的 15,000 token 日誌、100+ 次執行紀錄）。<br>
+<b>壓縮後：</b>系統提示（保留）＋CLAUDE.md（保留）＋<u>壓縮摘要</u>（「正在實作個人檔案編輯，UI 與服務層完成，現進行資料層整合與測試」）＋最近 5 個檔案內容。<br>
+<b>可能流失：</b>❌ architecture.md 的詳細規則 ❌ 初期設計判斷的理由 ❌ 中間步驟的試錯歷史。
+</div><div class="figcap">圖 6.12 / 6.13 / 6.14　自動壓縮的執行與推測機制</div></div>
+
+<p><b>(3) Context Rot（情境腐化）。</b>更根本的問題：<b>情境越大，LLM 效能本身越下降</b>——隨輸入 token 增加，正確參照/理解的能力下降。</p>
+<div class="callout tip"><span class="lbl">🔬 Chroma 公司的實驗（2025/7）</span>
+以 18 種 LLM（GPT-4.1、Claude 4、Gemini 2.5、Qwen3…）測試，刻意固定任務難度、只改輸入長度。即使是「原封不動複製 apple apple…」這種人類複製貼上絕不會錯的<b>極簡任務</b>，輸入一長，所有模型分數都下降：</div>
+<table>
+<tr><th>輸入長度</th><th>分數表現</th></tr>
+<tr><td>50–100 字</td><td>幾乎所有模型 0.95–1.0（部分已驟降到 0.7–0.8）</td></tr>
+<tr><td>1,000 字</td><td>Claude 系列（除 Haiku）維持 0.9+，多數模型降到 0.6–0.7</td></tr>
+<tr><td>2,500–5,000 字</td><td>僅 Claude Opus 4 維持 0.9 附近，多數降到 0.5–0.6</td></tr>
+<tr><td>10,000 字以上</td><td>幾乎都貼在 0.5、無法完成；僅 Opus 4 守在 0.7 附近</td></tr>
+</table>
+<div class="figcap" style="text-align:left">圖 6.15 / 表 6.5　Repeated Words 任務：輸入越長、分數越低</div>
+<div class="callout key"><span class="lbl">📌 啟示</span>Sonnet 4/4.5 雖有最大 100 萬 token 上限，但<b>實際能發揮效能的輸入，遠比上限短</b>。重點不是塞大量資訊，而是<b>「用更少 token 高效傳遞」</b>。</div>
+
+<h4>課題 2：不照意圖運作</h4>
+<p>這與課題 1 的「遺忘」不同——它<b>讀過規則、也理解</b>，實作時卻選了別的做法：</p>
+<div class="fig"><div class="figbox-list">
+<b>使用者：</b>請依 architecture.md，遵守「UI 層必經服務層存取資料」。<br>
+<b>Claude Code 實作出：</b><code>const userData = await db.users.findOne({id})</code> ← <b>直接存取資料層</b>（被禁止的樣式）！
+</div><div class="figcap">圖 6.16　不遵守架構規則</div></div>
+<p><b>(1) 隱性期待未明示。</b>專家心中「理所當然的步驟」沒寫進文件：</p>
+<div class="fig"><div class="figbox-list">
+<b>專家實際流程：</b>讀 README → 讀 architecture.md → <u>用 Grep 搜尋既有類似功能</u> → <u>讀既有實作</u> → <u>確認既有樣式（服務層呼叫、錯誤處理）</u> → 同樣式實作 → 測試…<br>
+<b>但 CLAUDE.md 只寫：</b>「實作新功能時務必確認 README.md 與 architecture.md」→ 中間「搜尋與確認既有樣式」三步沒寫。<br>
+<b>結果：</b>對 Claude Code 而言，沒寫的步驟＝「選用」而非「必須」→ 跳過 → 做出與既有樣式不一致的實作。
+</div><div class="figcap">圖 6.17 / 6.18　未明示的隱性期待，導致步驟被省略</div></div>
+<p><b>(2) 資料間衝突。</b>多份文件指示矛盾時，代理無法判斷該優先誰：</p>
+<div class="fig"><div class="figbox-list">
+<b>architecture.md：</b>「UI 層務必經服務層，禁止直接存取資料層。」<br>
+<b>development-guidelines.md：</b>「效能重要的畫面，建議直接存取資料來源。」<br>
+<b>既有 Dashboard.tsx：</b>為效能<u>直接存取</u>。<br>
+→ 收到「擴充儀表板」時，三者矛盾、又沒明示優先順序 → 第 1 次照 architecture.md（與既有不一致）→ 被要求照既有 → 第 2 次直接存取（違反 architecture.md）→ 來回打轉。
+</div><div class="figcap">圖 6.19 / 6.20　資料間矛盾的指示造成的混亂</div></div>
+<div class="callout tip"><span class="lbl">💡 常見成因</span>「總之塞大量資料、讓 Claude 自己判斷」這種無計畫地餵資料，最容易引發這種衝突。</div>
+
+<h4>課題 3：無法妥善連動外部系統</h4>
+<p>團隊開發要與各種外部系統連動（GitHub Issue/PR、Figma、瀏覽器驗證…）。第 3 章的 <b>MCP</b> 能用標準化方式連動，但<b>即使註冊了 MCP，代理也未必在期待的場景啟動期待的工具</b>——它依各工具的名稱與描述、連同預設工具一起選，因此「是否選對」受 MCP 工具描述是否具體影響。結果可能選不到適當 MCP，反而自己從零生成程式碼。</p>
+<div class="callout key"><span class="lbl">🛠️ 補充手段</span>別過度依賴 MCP，讓 Claude Code 用 <code>Bash</code> 操作 CLI 工具也很有效（性能強、更彈性）。但 Bash 幾乎能做本機任何事，因此需同時把執行環境<b>沙箱化</b>（第 7 章詳解）。</div>
+
+<h3>6.3　本章小結</h3>
+<div class="callout key"><span class="lbl">✅ 一句話總結</span>Claude Code ＝由「環境・知覺・記憶・推論・行動」五要素構成、<b>不斷依知覺選擇工具</b>的 AI 代理。</div>
+<p>三大課題與根因：</p>
+<ul>
+<li><b>忘記過去指示</b>：情境視窗容量限制 ＋ Context Rot 造成效能下降。</li>
+<li><b>不照意圖運作</b>：隱性期待沒寫出來、或多份資料指示衝突，導致代理混亂。</li>
+<li><b>無法妥善連動外部</b>：即使用 MCP，也無法保證選到期待的工具。</li>
+</ul>
+<p>第 7 章將給出對應解法：<b>情境工程</b>（壓縮／結構化筆記／子代理）、<b>提升指示追從性</b>（斜線指令／技能／鉤子）、<b>外部連動與安全</b>（MCP／Bash／Sandboxing）。</p>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "AI 代理的五個要素是？", "options": ["輸入、處理、輸出、儲存、顯示", "環境、知覺、記憶、推論、行動", "前端、後端、資料庫、網路、快取", "計畫、設計、實作、測試、部署"], "answer": 1, "explain": "五要素＝環境、知覺、記憶、推論、行動，協同運作達成目標。"}, {"type": "mc", "q": "在 Claude Code 中，所有「行動」的本質是？", "options": ["直接修改記憶體", "工具的執行", "改變模型權重", "發送網路封包"], "answer": 1, "explain": "Claude Code 的所有行動都以「工具的執行」呈現；它就是不斷選擇工具的代理。"}, {"type": "mc", "q": "Claude Code 的「知覺」主要從何取得？", "options": ["攝影機影像", "工具的執行結果", "使用者的語音", "系統時鐘"], "answer": 1, "explain": "數位環境下，知覺主要來自工具執行結果（Read 的檔案內容、Bash 的輸出等）。"}, {"type": "mc", "q": "短期記憶與長期記憶分別對應什麼？", "options": ["RAM 與硬碟", "情境視窗 與 外部檔案/資料庫", "快取 與 CDN", "變數 與 常數"], "answer": 1, "explain": "短期＝情境視窗（容量有限）；長期＝外部檔案/DB（實質無限，需要時載入）。"}, {"type": "tf", "q": "自動壓縮（auto-compaction）大約在情境視窗用量達 95% 時觸發。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。達約 95% 門檻時自動壓縮，把會話與工具歷史摘要化以騰出容量。"}, {"type": "mc", "q": "自動壓縮後，下列何者最可能「被流失」？", "options": ["系統提示", "CLAUDE.md", "architecture.md 的詳細規則與設計理由", "最近 5 個檔案內容"], "answer": 2, "explain": "系統提示、CLAUDE.md、最近檔案傾向保留；舊的詳細規則、設計判斷理由與試錯歷史易被摘要掉。"}, {"type": "mc", "q": "關於 Context Rot（情境腐化），下列何者正確？", "options": ["輸入越長，LLM 一定越準", "輸入越長，LLM 正確理解的能力傾向下降", "只發生在小模型", "壓縮後就不會發生"], "answer": 1, "explain": "輸入 token 越多，正確參照/理解能力下降；故重點是用更少 token 高效傳遞，而非塞滿上限。"}, {"type": "tf", "q": "Sonnet 有百萬 token 上限，代表把資料塞到接近上限也能維持同樣高的效能。", "options": ["正確", "錯誤"], "answer": 1, "explain": "錯誤。實驗顯示實際能發揮效能的輸入遠比上限短；塞太多反而因 Context Rot 降效能。"}, {"type": "mc", "q": "「課題2：不照意圖運作」最主要的原因是？", "options": ["模型忘記了規則", "隱性期待沒寫出來，或多份資料指示衝突", "網路太慢", "token 不夠"], "answer": 1, "explain": "它讀過也理解規則，問題在隱性期待未明示、或資料間矛盾，使推論做出非預期選擇。"}, {"type": "mc", "q": "三大課題分別對應哪個要素？", "options": ["全部對應推論", "忘記→記憶、不照意圖→推論、無法連動→行動", "忘記→行動、不照意圖→環境、無法連動→知覺", "與要素無關"], "answer": 1, "explain": "忘記過去指示→記憶；不照意圖→推論；無法連動外部→行動。"}, {"type": "tf", "q": "即使註冊了 MCP，Claude Code 也未必會在期待的場景選用期待的工具。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。它依工具名稱與描述、連同預設工具一起選；是否選對受 MCP 工具描述具體度影響。"}, {"type": "mc", "q": "想讓 Claude 對複雜任務「推論更深」，可在提示加入？", "options": ["fast", "ultrathink", "silent", "reset"], "answer": 1, "explain": "think / megathink / ultrathink 會提高思考預算（約 4k / 10k / 32k token）。"}];
+const SECTIONS=[["s61","6.1 把 Claude Code 理解為 AI 代理",0],["s62","6.2 三大課題",0],["s63","6.3 本章小結",0],["squiz","本章測驗",0]];
+const LS="cc_ch6_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECTIONS.forEach(s=>{if(st.sec[s[0]])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECTIONS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ h+='<a onclick="jump(\'s61\')">6.1 AI 代理五要素</a>';
+ h+='<a class="sub" onclick="jump(\'s61\')">環境/知覺/記憶/推論/行動</a>';
+ h+='<a onclick="jump(\'s62\')">6.2 三大課題</a>';
+ h+='<a class="sub" onclick="jump(\'s62\')">忘記指示・不照意圖・外部連動</a>';
+ h+='<a onclick="jump(\'s63\')">6.3 本章小結</a>';
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.getElementById('toc').querySelector('.tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div>';
+ h+='<button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;
+ bindQuiz();
+}
+let answered={};
+function bindQuiz(){
+ document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+  qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{
+   if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+   qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+   const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+   if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+   ex.classList.add('show');
+   if(Object.keys(answered).length===QUIZ.length)finish();
+  }});
+ });
+}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();
+}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+// inject section mark-read buttons next to h3 of 6.1/6.2/6.3
+function injectSecBtns(){
+ const map={'6.1':'s61','6.2':'s62','6.3':'s63'};
+ document.querySelectorAll('#main h3').forEach(h=>{
+  const t=h.textContent;
+  for(const k in map){ if(t.indexOf(k)===0){ h.id=map[k]; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=map[k]; b.setAttribute('onclick',"toggleSec('"+map[k]+"')"); h.appendChild(b);} }
+ });
+}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>

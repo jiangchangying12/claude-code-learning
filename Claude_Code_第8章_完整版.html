@@ -1,0 +1,181 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>第8章 把規格驅動開發機制化（設計篇） · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:240px;flex:0 0 240px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:13px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4;font-size:12.8px}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》第 8 章 · 最完整版</h1><div class=sub>斜線指令・技能・子代理 ｜ 把流程變成可重複的機制</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">第 8 章 · 機制化【設計篇】</div>
+<h2 class="ch-title">把規格驅動開發的流程機制化（設計篇）</h2>
+<p class="lead">作者：西見公宏。結合前面所學，把第 4 章體驗的規格驅動開發「用 Claude Code 機制化」：以<b>斜線指令</b>定義流程、以<b>技能</b>定義專屬指示、以<b>子代理</b>執行獨立處理，目標是把從構想筆記到文件生成、功能開發都自動化。本章用第 8 章的範例儲存庫（已備好環境與提示設定），在 Dev Container 上運作。</p>
+<div class="callout key"><span class="lbl">🎯 本章三主角</span>
+斜線指令（流程）＋技能（做法）＋子代理（獨立驗證）。第 9 章再用無頭模式把它們自動跑起來。</div>
+
+<h3>8.2　機制化的基本設計</h3>
+<h4>整體工作流程（四步）</h4>
+<div class="fig"><div class="figbox-list">
+① 建立構想筆記（docs/ideas/initial-requirements.md）→
+② <code>/setup-project</code> 生成 6 份永續性文件 →
+③ <code>/review-docs</code> 用子代理審查並修正 →
+④ <code>/add-feature</code> 進行功能開發（引導檔→實作→測試→驗證）。<br>
+人類只在「斜線指令內指示的核准點」介入；其餘由 Claude Code 執行、人類確認後放行。
+</div><div class="figcap">圖 8.1　以斜線指令構成的工作流程</div></div>
+
+<h4>為什麼要「事先準備好開發環境」</h4>
+<div class="callout tip"><span class="lbl">🧱 SetupBench 論文（Microsoft Research, 2025/7）</span>
+93 個實任務測 AI 代理的環境建構能力：成功率最高的 Sonnet 4 僅 <b>62.4%</b>，且成功案例中 38–69% 步驟是無謂作業。失敗模式：① 漏裝測試工具（裝了 requirements.txt 卻沒裝 pytest）② 推測設定值出錯（亂猜連接埠）③ 臨時性設定（shell 重啟後 PATH 失效）。<b>結論：環境建構對 AI 是高難度任務，長期專案宜由人類事先建好。</b></div>
+<p>本章用 <b>Dev Container</b> 整備環境（自動裝 Node LTS＋Claude Code），並在 <code>package.json</code> 備好 lint/format/typecheck/test 指令。</p>
+<pre><code>{
+  "scripts": {
+    "build":"tsc","lint":"eslint .","format":"prettier --write .",
+    "typecheck":"tsc --noEmit","test":"vitest run","test:coverage":"vitest run --coverage"
+  }
+}</code></pre>
+<div class="callout tip"><span class="lbl">⚠️ 關鍵</span>提示叫它跑的指令（如 <code>npm run lint</code>）<b>一定要能成功</b>。若實際執行失敗，Claude Code 會陷入恐慌、動作不穩——提示與環境必須一致。</div>
+<p>目錄結構也事先定好：<code>docs/</code>（永續性文件）、<code>.steering/</code>（作業單位文件）、<code>.claude/</code>（commands/skills/agents）、<code>CLAUDE.md</code>（全專案規則）。</p>
+
+<h3>8.3　以斜線指令自動化工作流程</h3>
+<p>把第 4 章對話流程原樣寫成提示。三個指令：</p>
+<table>
+<tr><th>指令</th><th>做什麼</th><th>核心</th></tr>
+<tr><td>/setup-project</td><td>從構想筆記生成 6 份永續性文件</td><td>只第一份要核准，其餘自動連生</td></tr>
+<tr><td>/review-docs</td><td>用 doc-reviewer 子代理審查文件</td><td>獨立情境、不污染主代理</td></tr>
+<tr><td>/add-feature</td><td>從引導檔→實作→測試→驗證全自動</td><td>實作迴圈＋例外規則</td></tr>
+</table>
+
+<h4>/setup-project：自動產生 6 份永續性文件</h4>
+<p>斜線指令以 Markdown 放在 <code>.claude/commands/</code>，檔名即指令名。它先讀 <code>docs/ideas/</code> 所有筆記，再用對應<b>技能</b>逐份生成（prd-writing→functional-design→…），<b>只在第一份 PRD 要求核准</b>，核准後其餘 5 份自動連生（各份參照前一份、確保一致）。</p>
+<pre><code>&gt; /setup-project
+● 讀取構想筆記 docs/ideas/initial-requirements.md
+● Skill('prd-writing') 生成 docs/product-requirements.md
+「PRD 完成，請確認；核准後進入下一份。」
+[使用者 OK] → 自動生成 functional-design / architecture / repository-structure / development-guidelines / glossary</code></pre>
+
+<h4>/review-docs：用子代理審查</h4>
+<p>以「文件路徑」為引數，委派給 <code>doc-reviewer</code> 子代理，提示明確指定觀點：① 完整性 ② 具體性 ③ 一致性 ④ 可測量性（PRD）。子代理在<b>獨立情境</b>讀大量檔做審查，回傳報告給主代理摘要——不消耗主代理情境。</p>
+
+<h4>/add-feature：功能開發全自動</h4>
+<p>以「功能名」為引數。流程：① 建引導目錄與三空檔（requirements/design/tasklist）② 讀 CLAUDE.md 與 docs/ 理解專案 ③ 用 Grep 調查既有樣式 ④ 以 <b>steering 技能（計畫模式）</b>生成三份引導檔 ⑤ <b>實作迴圈</b> ⑥ implementation-validator 驗證＋跑 test/lint/typecheck ⑦ 更新文件。</p>
+<div class="fig"><div class="figbox-list">
+<b>實作迴圈（圖 8.19）：</b>讀 tasklist.md → 有未完成任務？→ 執行最前面的未完成任務（steering 實作模式＋遵守 development-guidelines）→ Edit 把 [ ] 改 [x] → 回頭重複，<b>直到全部 [x] 才停</b>。
+</div><div class="figcap">圖 8.19　以任務清單為基礎的實作迴圈</div></div>
+<div class="callout key"><span class="lbl">🧯 例外處理規則（圖 8.20）</span>
+迴圈中自律處理：規則A 任務太大→拆成更小子任務；規則B 有明確技術理由不需要→以 <code>[x] ~~任務名~~ (理由)</code> 更新。<b>絕對禁止</b>：無故跳過未完成任務、無理由放置就結束、向使用者徵詢判斷。並在提示註明「完全自動執行、各步驟完成立即進入下一步、勿中途徵詢」——這是為無頭模式而設計。</div>
+
+<h3>8.4　以技能載入特化指示</h3>
+<p>技能由 Claude 自動載入，也可在提示明確要求載入。要點是<b>以適當粒度拆分</b>。本章把技能分兩類：</p>
+<table>
+<tr><th>類別</th><th>技能</th><th>用途</th></tr>
+<tr><td>文件生成（成果物單位）</td><td>prd-writing / functional-design / architecture-design / repository-structure / glossary-creation / development-guidelines</td><td>各生成一份永續性文件</td></tr>
+<tr><td>開發流程（任務狀況單位）</td><td>steering / development-guidelines</td><td>引導檔管理／程式碼規約</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 8.1　本章使用的技能一覽</div>
+<p><b>prd-writing</b> 把文件結構放 <code>template.md</code>，SKILL.md 指示「讀範本、把佔位符換成具體內容」。</p>
+<div class="callout key"><span class="lbl">✍️ 撰寫穩定提示三要點</span>
+① <b>斷定式</b>：用「務必含使用者故事」而非「可能的話請含」。② <b>定量式</b>：「定義主要人物誌 1 人、次要 1–2 人」「KPI 設 2–3 個」。③ <b>給具體判斷基準</b>：附「詳細度適中/不足/過剩」的範例，避免「請適切判斷」。</div>
+<p><b>steering 技能</b>用「模式」切換動作：模式1 計畫（從範本建三份引導檔）、模式2 實作（最重要：始終開著 tasklist.md、每完成一任務即時 Edit 打勾，禁止只用 TodoWrite、禁止跳過/留未完成）、模式3 驗證與回顧（確認全 [x]、記錄工夫/問題/設計變更理由/改善點）。<b>development-guidelines 技能</b>明示「既有 docs/development-guidelines.md 最優先」，並把細節拆到 guides/implementation.md、guides/process.md 按需參照，使 SKILL.md 精簡。</p>
+
+<h3>8.5　以子代理進行情境工程</h3>
+<p>把「需讀大量檔的審查/驗證」交給子代理，省主代理情境。</p>
+<h4>doc-reviewer：文件審查</h4>
+<p>從 5 觀點評估（完整性、明確性、一致性、可實作性、可測量性），明確定義檢查項目防疏漏，回傳「評價表＋良好點＋依〔必須〕/〔建議〕分級的問題（含箇所/理由/改善案）」。也可從 <code>/review-docs</code> 明確呼叫。</p>
+<h4>implementation-validator：實作品質驗證</h4>
+<p>從 5 觀點驗證：規格遵循、程式碼品質、測試覆蓋率、資安、效能。特徵是<b>邊讀需求規格文件、邊比對實作</b>，並執行 <code>npm run lint</code>、<code>npm test --coverage</code>、<code>tsc --noEmit</code> 取得定量指標，明確報告「實作與規格的相異點」（含影響與建議）。它在 <code>/add-feature</code> 最後驗證階段被啟動，使無頭執行時也能自律修正。</p>
+
+<h3>8.6　本章小結</h3>
+<div class="callout key"><span class="lbl">✅ 一句話總結</span>用<b>斜線指令（流程）＋技能（做法）＋子代理（獨立驗證）</b>，把規格驅動開發從「人工對話」變成「可重複、可自動」的機制。</div>
+<p>關鍵心法：事先備好環境與可執行的指令、提示要斷定/定量/給基準、自動執行要明確定義例外規則與「不中途停」。第 9 章將用無頭模式把這套機制實際自動跑起來。</p>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "哪個斜線指令『從構想筆記生成 6 份永續性文件』？", "options": ["/add-feature", "/review-docs", "/setup-project", "/init"], "answer": 2, "explain": "/setup-project 依序生成 6 份永續性文件，只第一份要核准。"}, {"type": "mc", "q": "SetupBench 論文的主要啟示是？", "options": ["環境建構對 AI 很簡單", "環境建構對 AI 是高難度任務，宜由人類事先建好", "AI 不該寫測試", "Dev Container 沒用"], "answer": 1, "explain": "成功率僅約 62%、且多無謂步驟，故長期專案建議人類先建環境。"}, {"type": "tf", "q": "提示叫 Claude 執行的指令（如 npm run lint）就算實際會失敗也沒關係。", "options": ["正確", "錯誤"], "answer": 1, "explain": "錯誤。若指令實際失敗，Claude Code 會陷入恐慌、動作不穩；提示與環境必須一致。"}, {"type": "mc", "q": "/add-feature 的『實作迴圈』何時停止？", "options": ["做一個任務就停", "直到 tasklist.md 全部變 [x]", "遇問題就問使用者", "隨機停"], "answer": 1, "explain": "自動消化到全完成；並有例外規則處理意外，禁止無故跳過或徵詢。"}, {"type": "mc", "q": "撰寫穩定提示時，下列何者較佳？", "options": ["可能的話請加測試", "請適當判斷格式", "KPI 務必設 2–3 個", "盡量寫好一點"], "answer": 2, "explain": "斷定式＋定量式指示讓代理動作更穩定。"}, {"type": "mc", "q": "為何把文件審查交給 doc-reviewer 子代理？", "options": ["比較快", "在獨立情境執行、不污染主代理情境", "省授權費", "主代理不會審查"], "answer": 1, "explain": "審查需讀大量檔，子代理隔離情境避免壓迫主代理。"}, {"type": "mc", "q": "steering 技能的『實作模式』最強調？", "options": ["多用 TodoWrite", "始終開著 tasklist.md、每完成一任務即時打勾、不跳過", "一次更新全部任務", "可留未完成任務結束"], "answer": 1, "explain": "即時更新 tasklist.md、禁止跳過或留未完成，是進度可追蹤的關鍵。"}, {"type": "mc", "q": "implementation-validator 的特徵是？", "options": ["只看程式碼風格", "邊讀需求規格邊比對實作，並跑 lint/test/typecheck", "只跑測試", "只檢查資安"], "answer": 1, "explain": "從規格遵循/品質/測試/資安/效能 5 觀點驗證，並明確報告與規格的相異點。"}, {"type": "tf", "q": "技能可分成『成果物單位』與『任務狀況單位』兩種拆分方式。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。文件生成依成果物（prd-writing 等），開發流程依任務狀況（steering 等）。"}, {"type": "mc", "q": "本章機制化的三個主角是？", "options": ["前端、後端、資料庫", "斜線指令、技能、子代理", "Git、npm、Docker", "Opus、Sonnet、Haiku"], "answer": 1, "explain": "斜線指令定義流程、技能定義做法、子代理做獨立驗證。"}];
+const SECS=[{"id": "s82", "label": "8.2 機制化的基本設計", "pfx": "8.2"}, {"id": "s83", "label": "8.3 斜線指令自動化", "pfx": "8.3"}, {"id": "s84", "label": "8.4 技能", "pfx": "8.4"}, {"id": "s85", "label": "8.5 子代理", "pfx": "8.5"}, {"id": "s86", "label": "8.6 本章小結", "pfx": "8.6"}];     // [{id,label,pfx}]
+const TITLE="第8章 把規格驅動開發機制化（設計篇）";
+const LS="cc_"+"ch8"+"_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECS.forEach(s=>{if(st.sec[s.id])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ SECS.forEach(s=>{h+='<a onclick="jump(\''+s.id+'\')">'+s.label+'</a>';});
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.querySelector('#toc .tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function injectSecBtns(){
+ document.querySelectorAll('#main h3').forEach(h=>{const t=h.textContent;
+  SECS.forEach(s=>{ if(t.indexOf(s.pfx)===0){ h.id=s.id; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=s.id; b.setAttribute('onclick',"toggleSec('"+s.id+"')"); h.appendChild(b);} });
+ });
+}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div><button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;bindQuiz();
+}
+let answered={};
+function bindQuiz(){document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+ qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+  qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+  const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+  if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+  ex.classList.add('show');if(Object.keys(answered).length===QUIZ.length)finish();
+ }})});}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>

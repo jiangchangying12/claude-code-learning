@@ -1,0 +1,143 @@
+<!DOCTYPE html><html lang=zh-Hant><head><meta charset=utf-8><meta name=viewport content='width=device-width,initial-scale=1'><title>附錄 服務設定・Anthropic 概要與法務 · 完整版</title><style>
+:root{--bg:#0f1216;--panel:#171c23;--panel2:#1e242d;--line:#2a323d;--txt:#e6eaf0;--muted:#9aa6b5;--accent:#d97757;--accent2:#5b9bd5;--ok:#4caf78;--bad:#e0655f;--warn:#e2b04a;--chip:#243040;}
+*{box-sizing:border-box}
+body{margin:0;font-family:"Noto Sans TC","Segoe UI","PingFang TC","Microsoft JhengHei",sans-serif;background:var(--bg);color:var(--txt);line-height:1.85;font-size:16px}
+#top{position:sticky;top:0;z-index:10;background:var(--panel);border-bottom:1px solid var(--line);padding:12px 20px;display:flex;justify-content:space-between;align-items:center;gap:16px;flex-wrap:wrap}
+#top h1{font-size:16px;margin:0;color:var(--accent)}
+#top .sub{font-size:11px;color:var(--muted)}
+#top .prog{flex:1;min-width:160px;max-width:320px}
+#top .bar{height:8px;background:var(--panel2);border-radius:6px;overflow:hidden}
+#top .fill{height:100%;width:0;background:linear-gradient(90deg,var(--accent),var(--accent2));transition:width .4s}
+#top .plbl{font-size:11px;color:var(--muted);margin-top:3px;text-align:right}
+#layout{display:flex;max-width:1180px;margin:0 auto}
+#toc{width:240px;flex:0 0 240px;padding:18px 10px}
+#toc .tw{position:sticky;top:74px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:10px}
+#toc .th{font-size:12px;color:var(--muted);margin:0 0 6px 6px}
+#toc a{display:block;padding:6px 10px;border-radius:7px;color:var(--txt);text-decoration:none;font-size:13px;cursor:pointer}
+#toc a:hover{background:var(--chip)}
+#toc a.sub{padding-left:22px;color:var(--muted);font-size:12.5px}
+#main{flex:1;min-width:0;padding:26px 40px;max-width:900px}
+.lead{color:#cfd6e0}
+.ch-tag{display:inline-block;background:var(--chip);color:var(--accent2);font-size:12px;padding:3px 10px;border-radius:20px;margin-bottom:10px}
+h2.ch-title{font-size:27px;margin:4px 0 16px;line-height:1.4}
+h3{font-size:20px;color:var(--accent);margin:34px 0 10px;border-left:4px solid var(--accent);padding-left:12px;scroll-margin-top:70px}
+h4{font-size:16.5px;color:var(--accent2);margin:22px 0 6px}
+p{margin:10px 0}ul,ol{margin:10px 0;padding-left:24px}li{margin:6px 0}
+code{background:#0b0e12;border:1px solid var(--line);border-radius:5px;padding:1px 6px;font-family:Consolas,Menlo,monospace;font-size:13.5px;color:#e6c07b}
+pre{background:#0b0e12;border:1px solid var(--line);border-radius:8px;padding:13px;overflow-x:auto}
+pre code{border:none;background:none;padding:0;color:#cdd6e4;font-size:12.8px}
+.callout{border-radius:10px;padding:13px 16px;margin:16px 0;border:1px solid var(--line);background:var(--panel)}
+.callout.ex{border-left:4px solid var(--ok)}.callout.tip{border-left:4px solid var(--warn)}.callout.key{border-left:4px solid var(--accent2);background:var(--panel2)}
+.callout .lbl{font-weight:700;font-size:13px;display:block;margin-bottom:5px}
+.callout.ex .lbl{color:var(--ok)}.callout.tip .lbl{color:var(--warn)}.callout.key .lbl{color:var(--accent2)}
+table{border-collapse:collapse;width:100%;margin:12px 0;font-size:13.5px}
+th,td{border:1px solid var(--line);padding:7px 10px;text-align:left;vertical-align:top}
+th{background:var(--panel2);color:var(--accent2)}
+.fig{margin:18px 0;padding:16px;background:var(--panel);border:1px solid var(--line);border-radius:12px}
+.fig svg{max-width:100%;height:auto;display:block;margin:0 auto}
+.figbox-list{font-size:14px;line-height:1.9}
+.figcap{font-size:12.5px;color:var(--muted);margin-top:10px;text-align:center}
+.secdone{float:right;font-size:12px;border:1.5px solid var(--ok);color:var(--ok);background:none;border-radius:16px;padding:4px 12px;cursor:pointer}
+.secdone.on{background:var(--ok);color:#fff}
+.quiz{margin-top:34px;border-top:2px dashed var(--line);padding-top:22px}
+.q{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin:14px 0}
+.qtype{font-size:11px;color:var(--muted);background:var(--chip);padding:2px 8px;border-radius:12px}
+.qtext{font-weight:600;margin:8px 0 10px}
+.opt{display:block;padding:9px 12px;border:1px solid var(--line);border-radius:8px;margin:6px 0;cursor:pointer}
+.opt:hover{background:var(--chip)}
+.opt.correct{border-color:var(--ok);background:rgba(76,175,120,.15)}
+.opt.wrong{border-color:var(--bad);background:rgba(224,101,95,.15)}
+.opt.disabled{cursor:default;opacity:.85}
+.explain{display:none;margin-top:8px;font-size:13px;color:#cfd6e0;background:var(--panel2);border-radius:8px;padding:10px}
+.explain.show{display:block}.explain .r{font-weight:700;display:block;margin-bottom:4px}.explain .r.ok{color:var(--ok)}.explain .r.bad{color:var(--bad)}
+.qscore{display:none;margin-top:14px;font-size:16px;text-align:center;padding:12px;border-radius:10px;background:var(--panel2)}.qscore.show{display:block}
+.reset{margin:24px 0;font-size:12px;color:var(--muted);background:none;border:1px solid var(--line);border-radius:6px;padding:6px 12px;cursor:pointer}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:24px}
+@media(max-width:820px){#toc{display:none}#main{padding:20px}}
+</style></head><body><div id=top><div><h1>《實踐 Claude Code 入門》附錄 · 最完整版</h1><div class=sub>Bedrock・GitHub CLI・合規與規約 ｜ 安全合規地使用</div></div><div class=prog><div class=bar><div class=fill id=fill></div></div><div class=plbl id=plbl>完成度 0%</div></div></div><div id=layout><nav id=toc><div class=tw></div></nav><main id=main>
+<div class="ch-tag">附錄 · 設定與法務</div>
+<h2 class="ch-title">服務設定、Anthropic 概要與法務規約</h2>
+<p class="lead">附錄涵蓋：Amazon Bedrock 與 GitHub CLI 的設定步驟，以及使用 Claude Code 時該理解的 Anthropic 公司概要、合規作為與契約規約。<b>以下為 2025 年 11 月時點資訊、不含法律建議，正式導入請看官方最新文件並諮詢法務/律師。</b></p>
+
+<h3>A.1　在 Amazon Bedrock 上使用 Claude Code</h3>
+<pre><code>export AWS_ACCESS_KEY_ID=...        # AWS 金鑰
+export AWS_SECRET_ACCESS_KEY=...
+export CLAUDE_CODE_USE_BEDROCK=1   # 改走 Bedrock
+export AWS_REGION=ap-northeast-1   # 東京區域
+export ANTHROPIC_MODEL='jp.anthropic.claude-sonnet-4-5-20250929-v1:0'</code></pre>
+<p>以 <code>/status</code> 確認 <code>API provider: AWS Bedrock</code>。經 Bedrock 使用時，模型存取的準據法與管轄依「客戶↔AWS」契約（日本企業可選日本法）；且 Bedrock 標準政策明載客戶資料不用於模型訓練、可指定模型所在區域。</p>
+
+<h3>A.2　GitHub CLI 的驗證</h3>
+<pre><code>gh auth login
+# → 選 GitHub.com → HTTPS → 用憑證驗證 → Login with a web browser
+# → 複製一次性代碼，在瀏覽器登入並輸入 → ✅ Authentication complete.</code></pre>
+
+<h3>B.1　Anthropic 概要、合規與法務</h3>
+<h4>公司概要</h4>
+<p>Anthropic 是 <b>PBC（Public Benefit Corporation，公益法人）</b>：依美國德拉瓦州法，章程載明同時追求營利與公共利益。2021 年由含前 OpenAI 成員的 7 人創立，使命含「為人類長期利益、負責任地開發先進 AI」。在企業 LLM API 市佔 <b>32%</b>、開發者程式碼生成市佔 <b>42%</b> 皆居首。</p>
+<h4>合規（第三方認證）</h4>
+<ul>
+<li><b>SOC 2 Type II</b>：驗證一定期間實際運作的有效性（較 Type I 嚴格）。</li>
+<li><b>ISO/IEC 27001:2022</b>：資訊安全管理國際規格。</li>
+<li><b>GDPR</b> 遵循（提供 DPA）、<b>HIPAA</b> 對應（需簽 BAA）、CCPA、PIPEDA、UK GDPR、APPI 等。</li>
+</ul>
+<p>文件（SOC 2 報告、ISO 證書、DPA、滲透測試報告）可向 Trust Center（trust.anthropic.com）申請。</p>
+<h4>規約：依方案不同</h4>
+<table>
+<tr><th>規約</th><th>消費者 (Free/Pro/Max)</th><th>Work (Team/Enterprise)</th><th>API</th></tr>
+<tr><td>Usage Policy</td><td>✓</td><td>✓</td><td>✓</td></tr>
+<tr><td>Consumer Terms</td><td>✓</td><td>—</td><td>—</td></tr>
+<tr><td>Commercial Terms</td><td>—</td><td>✓</td><td>✓</td></tr>
+</table>
+<div class="figcap" style="text-align:left">表 1　各方案適用的規約（Usage Policy 對所有人普遍適用）</div>
+<p><b>Usage Policy 主要禁止</b>：選舉操弄、惡意電腦活動（malware/攻擊；經同意的正當滲透測試例外）、侵害隱私、政府審查、兒虐/暴力/武器/訓練競品模型；高風險用途（醫療/法律/財務/雇用決定）需「人在迴圈＋向使用者揭露 AI」。</p>
+<div class="callout key"><span class="lbl">🏢 資料管理與著作權重點</span>
+<b>消費者方案</b>：Anthropic 為資料控管者，適用其隱私政策；「協助改善 Claude」可開關，<b>開啟時業務程式碼/提示可能被用於訓練</b>，需注意。<br>
+<b>Claude for Work（Team/Enterprise）</b>：企業為控管者、Anthropic 為處理者（適用 DPA）——<b>業務使用建議選 Team/Enterprise</b>。<br>
+<b>著作權</b>：生成程式碼的權利在適用法範圍內歸使用者（消費者與商用方案皆然）。<br>
+<b>IP 智財補償</b>（生成物被控侵權時的法律/金錢支援）：<b>僅商用方案適用</b>，且總責任額可能受限於過去 12 個月實付費用。</div>
+<div class="callout tip"><span class="lbl">📌 重要</span>規約與政策會變更；正式導入務必確認官方最新文件，並諮詢法務部門或律師。把「每當文件更新就確認、檢視對業務的影響」做成持續性活動。</div>
+<div class=quiz id=quizwrap></div></main></div><footer>單章完整學習頁 · 進度存於此瀏覽器 localStorage</footer><script>
+const QUIZ=[{"type": "mc", "q": "讓 Claude Code 透過 Amazon Bedrock 使用，需設定？", "options": ["CLAUDE_CODE_USE_BEDROCK=1", "USE_AWS=true", "BEDROCK_ON=1", "CLAUDE_AWS=yes"], "answer": 0, "explain": "export CLAUDE_CODE_USE_BEDROCK=1，並設金鑰與區域/模型。"}, {"type": "mc", "q": "Anthropic 的法人形態是？", "options": ["一般股份公司", "PBC 公益法人", "非營利組織", "政府機構"], "answer": 1, "explain": "PBC 同時追求營利與公共利益。"}, {"type": "mc", "q": "企業要妥善履行資料管理責任，建議用哪種方案？", "options": ["Free", "Pro", "Max", "Team / Enterprise"], "answer": 3, "explain": "Team/Enterprise 中企業為資料控管者、適用 DPA，較符合企業合規。"}, {"type": "mc", "q": "關於生成程式碼著作權，下列何者正確？", "options": ["歸 Anthropic", "在適用法範圍內歸使用者", "屬公共領域", "需另外付費購買"], "answer": 1, "explain": "Consumer 與 Commercial Terms 都明載權利讓渡給使用者。"}, {"type": "mc", "q": "IP 智財補償的重要限制是？", "options": ["適用所有方案", "僅商用方案，且總責任額可能受限於過去 12 個月實付費用", "無任何上限", "只適用消費者方案"], "answer": 1, "explain": "消費者方案不適用；責任額可能受實付費用限制。"}, {"type": "tf", "q": "消費者方案開啟『協助改善 Claude』時，業務提示/程式碼可能被用於模型訓練。", "options": ["正確", "錯誤"], "answer": 0, "explain": "正確。業務情境需特別留意此設定。"}, {"type": "mc", "q": "下列哪一項認證是 Anthropic 取得的？", "options": ["ISO 9001 only", "SOC 2 Type II 與 ISO/IEC 27001:2022", "沒有任何認證", "只有 GDPR"], "answer": 1, "explain": "取得 SOC 2 Type II、ISO 27001:2022，並遵循 GDPR、對應 HIPAA 等。"}, {"type": "tf", "q": "Usage Policy 只對 API 使用者適用，消費者方案不受其約束。", "options": ["正確", "錯誤"], "answer": 1, "explain": "錯誤。Usage Policy 對所有方案與提供形態普遍適用。"}];
+const SECS=[{"id": "sa1", "label": "A.1 Amazon Bedrock 設定", "pfx": "A.1"}, {"id": "sa2", "label": "A.2 GitHub CLI 驗證", "pfx": "A.2"}, {"id": "sb1", "label": "B.1 Anthropic 概要與法務", "pfx": "B.1"}];     // [{id,label,pfx}]
+const TITLE="附錄 服務設定・Anthropic 概要與法務";
+const LS="cc_"+"appx"+"_v1";
+let st=JSON.parse(localStorage.getItem(LS)||'{"sec":{},"score":null}');
+function save(){localStorage.setItem(LS,JSON.stringify(st))}
+function prog(){let d=0;SECS.forEach(s=>{if(st.sec[s.id])d++});if(st.score&&st.score.got>=st.score.total*0.6)d++;return Math.round(d/(SECS.length+1)*100)}
+function updProg(){const p=prog();document.getElementById('fill').style.width=p+'%';document.getElementById('plbl').textContent='完成度 '+p+'%'}
+function toc(){let h='<div class="th">本章導覽</div>';
+ SECS.forEach(s=>{h+='<a onclick="jump(\''+s.id+'\')">'+s.label+'</a>';});
+ h+='<a onclick="jump(\'squiz\')">📝 本章測驗</a>';
+ document.querySelector('#toc .tw').innerHTML=h;}
+function jump(id){const e=document.getElementById(id);if(e)e.scrollIntoView({behavior:'smooth'});}
+function toggleSec(id){st.sec[id]=!st.sec[id];save();paintSec();updProg();}
+function paintSec(){document.querySelectorAll('.secdone').forEach(b=>{const id=b.dataset.sec;if(st.sec[id]){b.classList.add('on');b.textContent='✓ 已讀'}else{b.classList.remove('on');b.textContent='標記已讀'}});}
+function injectSecBtns(){
+ document.querySelectorAll('#main h3').forEach(h=>{const t=h.textContent;
+  SECS.forEach(s=>{ if(t.indexOf(s.pfx)===0){ h.id=s.id; const b=document.createElement('button'); b.className='secdone'; b.dataset.sec=s.id; b.setAttribute('onclick',"toggleSec('"+s.id+"')"); h.appendChild(b);} });
+ });
+}
+function renderQuiz(){
+ let h='<h3 id="squiz">📝 本章測驗（'+QUIZ.length+' 題）<button class="secdone" data-sec="squiz" onclick="toggleSec(\'squiz\')"></button></h3><p style="color:var(--muted);font-size:14px">先自己想，再作答；答錯沒關係——「想過再看答案」記得最牢。</p>';
+ QUIZ.forEach((q,qi)=>{h+='<div class="q" data-qi="'+qi+'"><span class="qtype">'+(q.type==='tf'?'是非題':'選擇題')+'</span><div class="qtext">'+(qi+1)+'. '+q.q+'</div>';
+  q.options.forEach((o,oi)=>{h+='<label class="opt" data-oi="'+oi+'">'+(q.type==='tf'?'':String.fromCharCode(65+oi)+'. ')+o+'</label>'});
+  h+='<div class="explain"><span class="r"></span><span class="etext">'+q.explain+'</span></div></div>'});
+ h+='<div class="qscore" id="qscore"></div><button class="reset" onclick="resetAll()">⟳ 清除本章進度</button>';
+ document.getElementById('quizwrap').innerHTML=h;bindQuiz();
+}
+let answered={};
+function bindQuiz(){document.querySelectorAll('.q').forEach(qel=>{const qi=+qel.dataset.qi,q=QUIZ[qi];
+ qel.querySelectorAll('.opt').forEach(opt=>{opt.onclick=()=>{if(answered[qi]!=null)return;const oi=+opt.dataset.oi;answered[qi]=oi;
+  qel.querySelectorAll('.opt').forEach((o,k)=>{o.classList.add('disabled');if(k===q.answer)o.classList.add('correct');if(k===oi&&oi!==q.answer)o.classList.add('wrong')});
+  const ex=qel.querySelector('.explain'),r=qel.querySelector('.r');
+  if(oi===q.answer){r.textContent='✓ 答對了！';r.className='r ok'}else{r.textContent='✗ 答錯了，正確答案：'+(q.type==='tf'?q.options[q.answer]:String.fromCharCode(65+q.answer)+'. '+q.options[q.answer]);r.className='r bad'}
+  ex.classList.add('show');if(Object.keys(answered).length===QUIZ.length)finish();
+ }})});}
+function finish(){let got=0;QUIZ.forEach((q,qi)=>{if(answered[qi]===q.answer)got++});st.score={got,total:QUIZ.length};save();
+ const el=document.getElementById('qscore');const r=got/QUIZ.length;
+ el.textContent='得分 '+got+' / '+QUIZ.length+'（'+Math.round(r*100)+'%）'+(r>=0.6?' 🎉 通過！觀念清楚':' 💪 回頭複習標錯的觀念再來一次');
+ el.classList.add('show');updProg();}
+function resetAll(){if(confirm('清除本章已讀與測驗紀錄？')){st={sec:{},score:null};answered={};save();renderQuiz();paintSec();updProg();}}
+injectSecBtns();renderQuiz();toc();paintSec();updProg();
+</script></body></html>
